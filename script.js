@@ -12,11 +12,13 @@ function createViewOutline() {
     $(".nav-box").append(
         $('<ul/>', {'class': 'nav'}).append(
             $('<li/>', {'class': 'nav-item', 'id': 'single-poke', text: "Single Pokemon data"}),
-            $('<li/>', {'class': 'nav-item', 'id': 'compare-poke', text: "Pokemon comparison"})
+            $('<li/>', {'class': 'nav-item', 'id': 'compare-poke', text: "Pokemon comparison"}),
+            $('<li/>', {'class': 'nav-item', 'id': 'create-poke', text: "Create a Pokemon"})
         )
     )
     $("#single-poke").on("click", createSinglePokeView);
     $("#compare-poke").on("click", createPokeCompareView);
+    $("#create-poke").on("click", createCreatePokeView);
 }
 
 
@@ -358,6 +360,124 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
 }
 
 
+
+/* Create Create Pokemon view
+ */
+function createCreatePokeView() {
+    console.log("Creating create pokemon view");
+
+    $(".inner-content").html("");
+    $(".inner-content").append(
+        $('<form/>', {'id': 'create-poke-name-submission-page'}).append(
+            $('<div/>', {'class': 'create-poke-image'}).append(
+                $('<input/>', {'type': 'text', 'id': 'create-poke-image', 'placeholder': "image url", 'size': "15"}),
+                $('<button/>', {'class': 'preview-button', text: "Preview"})
+            ),
+            $('<table/>', {'id':'stats'}).append(
+                $('<tr/>', {'id': 'name'}).append(
+                    $('<th/>').html("Name:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-name', 'placeholder': "Pokemon Name", 'maxlength': "11", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'height'}).append(
+                    $('<th/>').html("Height:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-height', 'placeholder': "height in cm", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'weight'}).append(
+                    $('<th/>').html("Weight:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-weight', 'placeholder': "weight in cm", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'types'}).append(
+                    $('<th/>').html("Types:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-types', 'placeholder': "normal", 'size': "15"}),
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-types', 'placeholder': "type2, optional", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'base-stats'}).append(
+                    $('<th/>', {'colspan' : 2}).html("Base Stats: ")
+                ),
+                $('<tr/>', {'id': 'speed'}).append(
+                    $('<th/>').html("Speed:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-speed', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'special-defense'}).append(
+                    $('<th/>').html("Special-defense:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-special-defense', 'placeholder': "1",'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'special-attack'}).append(
+                    $('<th/>').html("Special attack:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-special-attack', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'defense'}).append(
+                    $('<th/>').html("Defense:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-defense', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'attack'}).append(
+                    $('<th/>').html("Attack:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-attack', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'hp'}).append(
+                    $('<th/>').html("Hp:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-hp', 'placeholder': "1", 'size': "15"})
+                    )
+                )
+            ),
+        ),
+        $('<button/>', {'class': 'submit-button', 'id': 'create-poke-name-submit', text: "Submit"})
+    );
+
+    $(".preview-button").on("click", previewImage(input="#create-poke-image"));
+    $("#create-poke-name-submit").on("click", submitPokemonCreationForm);
+}
+
+function previewImage(string) {
+
+    // $(".create-poke-image").append(
+    //     $('<input/>', {'type': 'text', 'id': 'create-poke-image', 'placeholder': "image url", 'size': "15"})
+    // )
+
+    // var preview = document.querySelector('img'); //selects the query named img
+    //    var file    = document.querySelector('input[type=file]').files[0]; //sames as here
+    //    var reader  = new FileReader();
+
+    //    reader.onloadend = function () {
+    //        preview.src = reader.result;
+    //    }
+
+    //    if (file) {
+    //        reader.readAsDataURL(file); //reads the data as a URL
+    //    } else {
+    //        preview.src = "";
+    //    }
+
+
+}
+
+function submitPokemonCreationForm() {
+
+    // document.getElementById("create-poke-name-submission-page").submit();
+}
+
+
+
+
 /* Pretty print an attribute by replacing dashes with spaces and capitalizing the first letter */
 function attributePP(string) {
     var newstr = string.replace(/-/g, " ");
@@ -373,5 +493,6 @@ $(document).ready(function(){
     $(".main-nav-item").on("click", createViewOutline);
     $("#single-poke").on("click", createSinglePokeView);
     $("#compare-poke").on("click", createPokeCompareView);
+    $("#create-poke").on("click", createCreatePokeView);
 });
 
