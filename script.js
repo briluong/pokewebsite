@@ -306,7 +306,7 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
     /*display the stats*/
     display_field
     .append($('<figure/>')
-        .append($('<img/>', {'src': pokemonInfo.sprites.front_default}))
+        .append($('<img/>', {'src': pokemonInfo.sprites.front_default, 'height': 96, 'width': 96}))
         .append($('<figcaption/>').html("Front"))
     )
     if (pokemonInfo.sprites.back_default){
@@ -368,10 +368,11 @@ function createCreatePokeView() {
 
     $(".inner-content").html("");
     $(".inner-content").append(
-        $('<form/>', {'id': 'create-poke-name-submission-page'}).append(
+        //$('<form/>', {'id': 'create-poke-name-submission-page'}).append(
             $('<div/>', {'class': 'create-poke-image'}).append(
+                $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
                 $('<input/>', {'type': 'text', 'id': 'create-poke-image', 'placeholder': "image url", 'size': "15"}),
-                $('<button/>', {'class': 'preview-button', text: "Preview"})
+                $('<button/>', {'id': 'preview-button', 'text': "Preview"})
             ),
             $('<table/>', {'id':'stats'}).append(
                 $('<tr/>', {'id': 'name'}).append(
@@ -395,8 +396,8 @@ function createCreatePokeView() {
                 $('<tr/>', {'id': 'types'}).append(
                     $('<th/>').html("Types:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-types', 'placeholder': "normal", 'size': "15"}),
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-types', 'placeholder': "type2, optional", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-type1', 'placeholder': "normal", 'size': "15"}),
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-type2', 'placeholder': "type2, optional", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'base-stats'}).append(
@@ -439,43 +440,128 @@ function createCreatePokeView() {
                     )
                 )
             ),
-        ),
-        $('<button/>', {'class': 'submit-button', 'id': 'create-poke-name-submit', text: "Submit"})
+            $('<button/>', {'class': 'submit-button', 'id': 'create-poke-name-submit', 'text':"Submit"})
+        
     );
 
-    $(".preview-button").on("click", previewImage(input="#create-poke-image"));
+    $("#preview-button").on("click", previewImage);
     $("#create-poke-name-submit").on("click", submitPokemonCreationForm);
 }
 
-function previewImage(string) {
-
-    // $(".create-poke-image").append(
-    //     $('<input/>', {'type': 'text', 'id': 'create-poke-image', 'placeholder': "image url", 'size': "15"})
-    // )
-
-    // var preview = document.querySelector('img'); //selects the query named img
-    //    var file    = document.querySelector('input[type=file]').files[0]; //sames as here
-    //    var reader  = new FileReader();
-
-    //    reader.onloadend = function () {
-    //        preview.src = reader.result;
-    //    }
-
-    //    if (file) {
-    //        reader.readAsDataURL(file); //reads the data as a URL
-    //    } else {
-    //        preview.src = "";
-    //    }
-
-
+function previewImage() {
+    console.log("preview image");
+    url = $("#create-poke-image").val();
+    console.log(url);
+    if(url==""){
+        url = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
+    }
+    $('#create-poke-pic').attr('src', url);
+    return;
 }
 
+/* Submits the pokemon to the db if is valid*/
 function submitPokemonCreationForm() {
+    var user = getCookie("username");
+    // check if pokemon name already in directory
+    var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
+    if(!validatePokemonCreation()){
+        alert("page is missing input, please fill in all the fields provided");
+        return; 
+        
+    }
+    else{
+        var pokemon = searchForPokemon(pokeName, user);
 
-    // document.getElementById("create-poke-name-submission-page").submit();
+        //if pokemon already exists prompt user to come up with a new name
+        if(pokemon){
+            alert("pokemon with this name already exists, please enter a new name");
+        }
+        else{
+            //store all info into a pokemon object and submit the pokemon
+            types = [$("#create-poke-type1").val()];
+            if($("#create-poke-type1").val()!=""){
+                types.append($("#create-poke-type2").val());
+            }
+
+            pokeImg = $("#create-poke-image").val();
+            if(pokeImg==""){
+                pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
+            }
+
+            pokemon = {
+                'name': pokeName,
+                'height': $("#create-poke-height").val(),
+                'weight': $("#create-poke-weight").val(),
+                'types': types,
+                'speed': $("#create-poke-speed").val(),
+                'special_defense': $("#create-poke-special-defense").val(),
+                'special_attack': $("#create-poke-special-attack").val(),
+                'defense': $("#create-poke-defense").val(),
+                'attack': $("#create-poke-attack").val(),
+                'hp': $("#create-poke-hp").val(),
+                'sprites': {'front_default': $("#create-poke-image").val()},
+                'user': user,
+                'del': false
+            }
+            //submit to db
+        }   
+    }
+
+    
 }
 
+/*validates the pokemon creation page */
+function validatePokemonCreation(){
+    var empty = true;
+    $('input[type="text"]').each(function(){
+        if($(this).val()!=""){
+            if($(this).attr(id)=="create-poke-type2" || $(this).attr(id)=="create-poke-image"){
+                empty = false;
+                return false;
+            }
+        }
+    });
 
+    return empty;
+}
+
+function searchForPokemon(pokeName, userID){
+    if (pokemonName == ""){
+        console.log('input was blank');
+        return -2;
+    }
+
+    var localPoke = searchLocalPokeDB(pokeName, userID);
+
+
+    var pokeID = searchOrigPokemon(pokeName);
+    if(pokeID < 1){
+        //pokemon was not in the orig set
+        var userPoke
+    }
+
+}
+
+function searchLocalPokeDB(pokeName, userID){
+    /*conecting to the database*/
+    var MongoClient = require('mongodb').MongoClient
+    var url = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db"
+        MongoClient.connect(url, function(err,res){
+                if(err) console.log(err)
+                console.log("Database created");
+                db = res
+                
+                // Add functions here
+                db.collection("sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION").find({name: pokeName, user: userID}, { _id:0, name:1, user:1, }).toArray(function(err, results){
+                    return results;
+                });
+                
+    });
+}
+
+function getCookie(string){
+    return "username";
+};
 
 
 /* Pretty print an attribute by replacing dashes with spaces and capitalizing the first letter */
