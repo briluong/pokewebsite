@@ -442,6 +442,15 @@ function createCreatePokeView() {
                     $('<td/>').append(
                         $('<input/>', {'type': 'text','id': 'create-poke-hp', 'placeholder': "1", 'size': "15"})
                     )
+                ),
+                $('<tr/>', {'id': 'private-status'}).append(
+                    $('<th/>', {'colspan' : 2}).append(
+                        $('<input/>', {'type': 'radio', 'name': 'status', 'value': "public", 'checked': "checked"}),
+                        "public",
+                        $('<br/>'),
+                        $('<input/>', {'type': 'radio', 'name': 'status', 'value': "private", 'text': 'private'}),
+                        "private"
+                    )
                 )
             ),
             $('<button/>', {'class': 'submit-button', 'id': 'create-poke-name-submit', 'text':"Submit"})
@@ -494,7 +503,7 @@ function submitPokemonCreationForm() {
         var pokeImg = $("#create-poke-image").val();
         if(pokeImg == ""){
             pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
-       }
+        }
 
         var pokemon = {
             'name': pokeName,
@@ -509,15 +518,12 @@ function submitPokemonCreationForm() {
             'hp': $("#create-poke-hp").val(),
             'sprites': {'front_default': pokeImg},
             'user': user,
-            'del': false
+            'status': $('input[name=status]:checked').val() //del, public, private
         }
         //submit to db
         console.log(pokemon);
         return false;
-//        }   
     }
-
-    
 }
 
 /*validates the pokemon creation page */
