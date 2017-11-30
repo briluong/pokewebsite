@@ -368,12 +368,16 @@ function createCreatePokeView() {
 
     $(".inner-content").html("");
     $(".inner-content").append(
-        //$('<form/>', {'id': 'create-poke-name-submission-page'}).append(
-            $('<div/>', {'class': 'create-poke-image'}).append(
-                $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
-                $('<input/>', {'type': 'text', 'id': 'create-poke-image', 'placeholder': "image url", 'size': "15"}),
-                $('<button/>', {'id': 'preview-button', 'text': "Preview"})
-            ),
+        $('<div/>', {'class': 'create-poke-image'}).append(
+            $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
+            $('<button/>', {'id': 'preview-button', 'text': "Preview"})
+        ),
+        $('<form/>', {'name': 'create-poke-name-submission-page', 'id': 'create-poke-form', "onsubmit":"return submitPokemonCreationForm()", "method":"post"}).append(
+            // $('<div/>', {'class': 'create-poke-image'}).append(
+            //     $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
+            $('<input/>', {'type': 'text', 'id': 'create-poke-image', 'placeholder': "image url", 'size': "15"}),
+            //     $('<button/>', {'id': 'preview-button', 'text': "Preview"})
+            // ),
             $('<table/>', {'id':'stats'}).append(
                 $('<tr/>', {'id': 'name'}).append(
                     $('<th/>').html("Name:"),
@@ -390,7 +394,7 @@ function createCreatePokeView() {
                 $('<tr/>', {'id': 'weight'}).append(
                     $('<th/>').html("Weight:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-weight', 'placeholder': "weight in cm", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'id': 'create-poke-weight', 'placeholder': "weight in kg", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'types'}).append(
@@ -436,16 +440,16 @@ function createCreatePokeView() {
                 $('<tr/>', {'id': 'hp'}).append(
                     $('<th/>').html("Hp:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-hp', 'placeholder': "1", 'size': "15"})
+                        $('<input/>', {'type': 'text','id': 'create-poke-hp', 'placeholder': "1", 'size': "15"})
                     )
                 )
             ),
             $('<button/>', {'class': 'submit-button', 'id': 'create-poke-name-submit', 'text':"Submit"})
-        
+       ) 
     );
 
     $("#preview-button").on("click", previewImage);
-    $("#create-poke-name-submit").on("click", submitPokemonCreationForm);
+    //$("#create-poke-name-submit").on("click", submitPokemonCreationForm);
 }
 
 function previewImage() {
@@ -461,68 +465,77 @@ function previewImage() {
 
 /* Submits the pokemon to the db if is valid*/
 function submitPokemonCreationForm() {
+    console.log("submit pokemon")
     var user = getCookie("username");
     // check if pokemon name already in directory
     var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
-    if(!validatePokemonCreation()){
+    if(!isValidPokemonCreation()){
         alert("page is missing input, please fill in all the fields provided");
-        return; 
+        return false; 
         
     }
     else{
-        var pokemon = searchForPokemon(pokeName, user);
+        console.log("page is valid");
+        
+        //var pokemon = searchForPokemon(pokeName, user);
 
         //if pokemon already exists prompt user to come up with a new name
-        if(pokemon){
-            alert("pokemon with this name already exists, please enter a new name");
-        }
-        else{
+        //if(pokemon){
+        //    alert("pokemon with this name already exists, please enter a new name");
+        //}
+       // else{
             //store all info into a pokemon object and submit the pokemon
-            types = [$("#create-poke-type1").val()];
-            if($("#create-poke-type1").val()!=""){
-                types.append($("#create-poke-type2").val());
-            }
+        var types = [$("#create-poke-type1").val()];
+        if($("#create-poke-type2").val() !== ""){
+            console.log("poke type2");
+            types.push($("#create-poke-type2").val());
+        }
 
-            pokeImg = $("#create-poke-image").val();
-            if(pokeImg==""){
-                pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
-            }
+        var pokeImg = $("#create-poke-image").val();
+        if(pokeImg == ""){
+            pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
+       }
 
-            pokemon = {
-                'name': pokeName,
-                'height': $("#create-poke-height").val(),
-                'weight': $("#create-poke-weight").val(),
-                'types': types,
-                'speed': $("#create-poke-speed").val(),
-                'special_defense': $("#create-poke-special-defense").val(),
-                'special_attack': $("#create-poke-special-attack").val(),
-                'defense': $("#create-poke-defense").val(),
-                'attack': $("#create-poke-attack").val(),
-                'hp': $("#create-poke-hp").val(),
-                'sprites': {'front_default': $("#create-poke-image").val()},
-                'user': user,
-                'del': false
-            }
-            //submit to db
-        }   
+        var pokemon = {
+            'name': pokeName,
+            'height': $("#create-poke-height").val(),
+            'weight': $("#create-poke-weight").val(),
+            'types': types,
+            'speed': $("#create-poke-speed").val(),
+            'special_defense': $("#create-poke-special-defense").val(),
+            'special_attack': $("#create-poke-special-attack").val(),
+            'defense': $("#create-poke-defense").val(),
+            'attack': $("#create-poke-attack").val(),
+            'hp': $("#create-poke-hp").val(),
+            'sprites': {'front_default': pokeImg},
+            'user': user,
+            'del': false
+        }
+        //submit to db
+        console.log(pokemon);
+        return false;
+//        }   
     }
 
     
 }
 
 /*validates the pokemon creation page */
-function validatePokemonCreation(){
-    var empty = true;
-    $('input[type="text"]').each(function(){
-        if($(this).val()!=""){
-            if($(this).attr(id)=="create-poke-type2" || $(this).attr(id)=="create-poke-image"){
-                empty = false;
+function isValidPokemonCreation(){
+    console.log("validating pokemon creation form")
+    var valid = true;
+    $("#create-poke-form input[type=text]").each(function(){
+        console.log($(this).val())
+        if($(this).val()==""){
+            console.log($(this).attr("id"))
+            if($(this).attr("id")!=="create-poke-type2" && $(this).attr("id")!=="create-poke-image"){
+                valid = false;
                 return false;
             }
         }
     });
-
-    return empty;
+    return valid;
+    //return false
 }
 
 function searchForPokemon(pokeName, userID){
@@ -532,6 +545,15 @@ function searchForPokemon(pokeName, userID){
     }
 
     var localPoke = searchLocalPokeDB(pokeName, userID);
+    // this is not null or empty
+    if(localPoke){
+        // check if pokemon is "deleted"
+        if(localpoke.del){
+            //pokemon does not exist
+            console.log("pokemon found to be deleted in the local db")
+            return -1;
+        }
+    }
 
 
     var pokeID = searchOrigPokemon(pokeName);
@@ -551,10 +573,10 @@ function searchLocalPokeDB(pokeName, userID){
                 console.log("Database created");
                 db = res
                 
-                // Add functions here
+                // need this to be returned
                 db.collection("sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION").find({name: pokeName, user: userID}, { _id:0, name:1, user:1, }).toArray(function(err, results){
-                    return results;
-                });
+                        return results;
+                    })
                 
     });
 }
