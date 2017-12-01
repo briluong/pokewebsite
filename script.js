@@ -8,7 +8,7 @@ function createViewOutline() {
             $('<div/>', {'class': 'col-sm-3 nav-box', text:"Navigation"}),
             $('<div/>', {'class': 'col-sm-9 inner-content', 'align': 'center'})
         )
-    )
+    );
     $(".nav-box").append(
         $('<ul/>', {'class': 'nav'}).append(
             $('<li/>', {'class': 'nav-item', 'id': 'single-poke', text: "Single Pokemon data"}),
@@ -153,12 +153,12 @@ function recursiveAjaxSearch(result, pokemon, offset, input){
                     else if (input == "#single-input-delete") {
                         $(".display-stats-delete").empty();
                         display_field = $(".display-stats-delete");
-                        i = 0;
+                        i = 3;
                         }
                     else if (input == "#single-input-edit") {
                         $(".display-stats-edit").empty();
                         display_field = $(".display-stats-edit");
-                        i = 0;
+                        i = 4;
                         }
                     else if (input == "#input-0") {
                         // clear current field
@@ -298,7 +298,9 @@ function comparePokemon(p1, p2) {
     hp2 = parseInt($("#hp2 > td").text());
     dict[5] = new Array(hp1, hp2, $("#hp1"), $("#hp2"));
     
-    for (var i = 0; i < dict.length; i++) {
+    dictl = dict.length
+    
+    for (var i = 0; i < dictl; i++) {
         if (dict[i][0] < dict[i][1]) {
             dict[i][3].css("background-color", "turquoise");
         } 
@@ -347,8 +349,8 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
             .append($('<figcaption/>').html("Female back")))
     }
 
-    display_field
-    .append($('<table/>', {'id':'stats'+i})
+    display_field.append(
+    $('<table/>', {'id':'stats'+i})
         .append($('<tr/>', {'id': 'name'+i})
             .append($('<th/>').html("Name:"))
             .append($('<td/>').html(attributePP(pokemonInfo.name)))
@@ -437,41 +439,65 @@ function createManagePokeView() {
             ),
             $('<div/>', {'class': 'confirm-edit'}).append(
                 $('<p/>', {'id': 'edit-text-curr'}).html("Current version:").hide(),
+                $('<p/>', {'id': 'edit-text-editted'}).html("Editted version:").hide(),
                 
                 $('<div/>', {'class': 'row', 'id': 'editing-space'}).append(
                     $('<div/>', {'class': 'col-sm-5 display-pokemon-col'}).append(
                         $('<div/>', {'class': 'display-stats-edit'})
                     ),
                     $('<div/>', {'class': 'col-sm-2 between-cols-2'}),
-                    $('<div/>', {'class': 'col-sm-5 edit-pokemon-col'}).hide().append(
-                        $('<table/>', {'id': 'edit-table'})
-                            .append($('<tr/>', {'id': 'input0'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-0', 'placeholder': "Input Height", 'maxlength': "11", 'size': "25"}))
-                            )
-                            .append($('<tr/>', {'id': 'input1'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-1', 'placeholder': "Input Weight", 'maxlength': "11", 'size': "25"}))
-                            )
-                            .append($('<tr/>', {'id': 'input2'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-2', 'placeholder': "Input Types", 'maxlength': "11", 'size': "25"}))
-                            )
-                            .append($('<tr/>', {'id': 'input3'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-3', 'placeholder': "Input Speed", 'maxlength': "11", 'size': "25"}))
-                            )
-                            .append($('<tr/>', {'id': 'input4'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-4', 'placeholder': "Input Special defense", 'maxlength': "11", 'size': "25"}))
-                            )
-                            .append($('<tr/>', {'id': 'input5'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-5', 'placeholder': "Input Special attack", 'maxlength': "11", 'size': "25"}))
-                            )
-                            .append($('<tr/>', {'id': 'input6'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-6', 'placeholder': "Input Defense", 'maxlength': "11", 'size': "25"}))
-                            )
-                            .append($('<tr/>', {'id': 'input7'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-7', 'placeholder': "Input Attack", 'maxlength': "11", 'size': "25"}))
-                            )
-                            .append($('<tr/>', {'id': 'input8'})
-                                .append($('<input/>', {'type': 'text', 'id': 'single-input-8', 'placeholder': "Input Value", 'maxlength': "11", 'size': "25"}))
-                            )
+                    $('<div/>', {'class': 'col-sm-5 edit-pokemon-col', 'padding': 'bottom'}).hide().append(
+                        $('<table/>', {'id': 'edit-table'}).append(
+                            
+                            $('<tr/>', {'id': 'private-status'})
+                            .append($('<th/>', {'colspan' : 2})
+                                    .append($('<input/>', {'type': 'radio', 'name': 'status', 'value': "public", 'checked': "checked"}), "public",
+                                            $('<br/>'),
+                                            $('<input/>', {'type': 'radio', 'name': 'status', 'value': "private", 'text': 'private'}), "private"))
+                            ,
+                            $('<tr/>', {'id': 'input-height'})
+                            .append($('<th/>', {'id': 'input0'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-0', 'placeholder': "Input Height", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-weight'})
+                            .append($('<th/>', {'id': 'input1'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-1', 'placeholder': "Input Weight", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-types'})
+                            .append($('<th/>', {'id': 'input2'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-2', 'placeholder': "Input Types", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-base-stats'})
+                            .append($('<th/>', {'id': 'input2'}).html("Base Stats:"))
+                            ,
+                            $('<tr/>', {'id': 'input-speed'})
+                            .append($('<th/>', {'id': 'input3'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-3', 'placeholder': "Input Speed", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-special-defense'})
+                            .append($('<th/>', {'id': 'input4'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-4', 'placeholder': "Input Special defense", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-special-attack'})
+                            .append($('<th/>', {'id': 'input5'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-5', 'placeholder': "Input Special attack", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-defense'})
+                            .append($('<th/>', {'id': 'input6'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-6', 'placeholder': "Input Defense", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-attack'})
+                            .append($('<th/>', {'id': 'input7'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-7', 'placeholder': "Input Attack", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-value'})
+                            .append($('<th/>', {'id': 'input8'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-8', 'placeholder': "Input Value", 'maxlength': "11", 'size': "15"})))
+                            ,
+                            $('<tr/>', {'id': 'input-hp'})
+                            .append($('<th/>', {'id': 'input9'})
+                                .append($('<input/>', {'type': 'text', 'id': 'single-input-9', 'placeholder': "Input Hp", 'maxlength': "11", 'size': "15"})))
+                        )
                     )
                 ),
                 $('<button/>', {'class': 'confirm-edit-button', text: "Confirm Edit"}).on('load').on('click', renewPokemon).hide(),
@@ -483,43 +509,47 @@ function createManagePokeView() {
 
 
 function deleteSinglePokemon(){
-    displayPokemonStats(input="#single-input-delete");
-    $(".confirm-delete-button").show()
+    displayPokemonStats(input="#single-input-delete");    
     $('#delete-text-curr').show()
+    $(".confirm-delete-button").show()
     $('#delete-confirm-text').hide()
 }
 
 
 function editSinglePokemon(){
-    displayPokemonStats(input="#single-input-edit");
+    displayPokemonStats(input="#single-input-edit");        
+    $('#edit-text-curr').show();
     $(".edit-pokemon-col").show();
     $(".confirm-edit-button").show();
-    $('#edit-text-curr').show();
     $('#edit-confirm-text').hide();
 }
 
 
 function deletePokemon(){
-    // TODO: db
-    $(".display-stats-delete").empty();
-    $(".confirm-delete-button").hide();
+    // TODO: delete from database. [change status to del.]
     $('#delete-text-curr').hide();
+    $(".display-stats-delete").hide();
+    $(".confirm-delete-button").hide();
     $('#delete-confirm-text').show();
-    
 }
 
 
 function renewPokemon(){
-    $(".display-stats-delete").empty();
+    // TODO: add update to database.
+    $('#edit-text-curr').hide();
+    $(".edit-pokemon-col").hide();
+    // To load the updated pokemon from db.
+    $(".display-stats-edit").empty();
+    showUpdatePokemon();
+    
     $(".confirm-edit-button").hide();
     $('#edit-confirm-text').show();
-    showUpdatePokemon();
 }
 
 
 function showUpdatePokemon(){
-    $('#editing-space').hide();
-    $(".display-stats-delete").append();  // TODO: db, SHOW UPDATES
+    displayPokemonStats(input="#single-input-edit");
+    $('#edit-text-editted').show();
 }
 
 

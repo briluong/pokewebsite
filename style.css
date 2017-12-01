@@ -39,7 +39,6 @@
     margin-left: 0;
     padding-left: 0;
 }
-
 table, th, td {
     width: 100%;
     border: 1px solid black;
@@ -48,6 +47,8 @@ table, th, td {
 th, td {
     padding: 5px;
     text-align: left;    
+    padding: 12px;
+    margin-left: 0;
 }
 input {
     margin: 5px 10px 5px 10px;
@@ -58,4 +59,9 @@ figcaption {
 }
 figure {
     display: inline-block;
+}
+
+sub-heading {
+    color: turquoise;
+    text-transform: uppercase;
 }
