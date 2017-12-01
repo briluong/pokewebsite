@@ -112,7 +112,7 @@ function getRandomPokemon(event) {
     }
 
 
-/* Check that input is valid by querying API and display Pokemon stats
+/* Check that input is formFilledby querying API and display Pokemon stats
  */
 
 function displayPokemonStats(input) {
@@ -473,92 +473,103 @@ function previewImage() {
 }
 
 /* Submits the pokemon to the db if is valid*/
-function submitPokemonCreationForm() {
-    console.log("submit pokemon")
-    var user = getCookie("username");
-    // check if pokemon name already in directory
-    var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
-    if(!isValidPokemonCreation()){
-        alert("page is missing input, please fill in all the fields provided");
-        return false; 
+// function submitPokemonCreationForm() {
+//     console.log("submit pokemon")
+//     var user = getCookie("username");
+//     // check if pokemon name already in directory
+//     var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
+//     if(!isValidPokemonCreation()){
+//         alert("page is missing input, please fill in all the fields provided");
+//         return false; 
         
-    }
-    else{
-        console.log("page is valid");
+//     }
+//     else{
+//         console.log("page is valid");
         
-        //var pokemon = searchForPokemon(pokeName, user);
+//         var pokemon = createPokemonCheck(pokeName, user);
 
-        //if pokemon already exists prompt user to come up with a new name
-        //if(pokemon){
-        //    alert("pokemon with this name already exists, please enter a new name");
-        //}
-       // else{
-            //store all info into a pokemon object and submit the pokemon
-        var types = [$("#create-poke-type1").val()];
-        if($("#create-poke-type2").val() !== ""){
-            console.log("poke type2");
-            types.push($("#create-poke-type2").val());
-        }
+//         //if pokemon already exists prompt user to come up with a new name
+//         if(pokemon){
+//             alert("pokemon with this name already exists, please enter a new name");
+//         }
+//         else{
+//             //store all info into a pokemon object and submit the pokemon
+//             var types = [$("#create-poke-type1").val()];
+//             if($("#create-poke-type2").val() !== ""){
+//                 console.log("poke type2");
+//                 types.push($("#create-poke-type2").val());
+//             }
 
-        var pokeImg = $("#create-poke-image").val();
-        if(pokeImg == ""){
-            pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
-        }
+//             var pokeImg = $("#create-poke-image").val();
+//             if(pokeImg == ""){
+//                 pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
+//             }
 
-        var pokemon = {
-            'name': pokeName,
-            'height': $("#create-poke-height").val(),
-            'weight': $("#create-poke-weight").val(),
-            'types': types,
-            'speed': $("#create-poke-speed").val(),
-            'special_defense': $("#create-poke-special-defense").val(),
-            'special_attack': $("#create-poke-special-attack").val(),
-            'defense': $("#create-poke-defense").val(),
-            'attack': $("#create-poke-attack").val(),
-            'hp': $("#create-poke-hp").val(),
-            'sprites': {'front_default': pokeImg},
-            'user': user,
-            'status': $('input[name=status]:checked').val() //del, public, private
-        }
-        //submit to db
-        console.log(pokemon);
-        return false;
-    }
-}
+//             var pokemon = {
+//                 'name': pokeName,
+//                 'height': $("#create-poke-height").val(),
+//                 'weight': $("#create-poke-weight").val(),
+//                 'types': types,
+//                 'speed': $("#create-poke-speed").val(),
+//                 'special_defense': $("#create-poke-special-defense").val(),
+//                 'special_attack': $("#create-poke-special-attack").val(),
+//                 'defense': $("#create-poke-defense").val(),
+//                 'attack': $("#create-poke-attack").val(),
+//                 'hp': $("#create-poke-hp").val(),
+//                 'sprites': {'front_default': pokeImg},
+//                 'user': user,
+//                 'status': $('input[name=status]:checked').val() //del, public, private
+//             }
+//             //submit to db
+//             console.log(pokemon);
+//             return false;
+//         }
+//     }
+// }
 
 /*validates the pokemon creation page */
 function isValidPokemonCreation(){
     console.log("validating pokemon creation form")
-    var valid = true;
+    var formFilled= true;
     $("#create-poke-form input[type=text]").each(function(){
         console.log($(this).val())
         if($(this).val()==""){
             console.log($(this).attr("id"))
             if($(this).attr("id")!=="create-poke-type2" && $(this).attr("id")!=="create-poke-image"){
-                valid = false;
+                formFilled= false;
                 return false;
             }
         }
     });
+
     return valid;
     //return false
 }
 
-function searchForPokemon(pokeName, userID){
+function createPokemonCheck(pokeName, userID){
     if (pokemonName == ""){
         console.log('input was blank');
         return -2;
     }
 
-    var localPoke = searchLocalPokeDB(pokeName, userID);
+    var localPokes = searchLocalPokeDB(pokeName);
     // this is not null or empty
-    if(localPoke){
-        // check if pokemon is "deleted"
-        if(localpoke.del){
-            //pokemon does not exist
-            console.log("pokemon found to be deleted in the local db")
-            return -1;
-        }
+    if(localPokes){
+        //local poke is a collection of pokemon in the db with that pokemon name
+
+        // if(localPokes.length > 0){
+        //     cycle through the pokemon and find the public one
+        //         if no public one exists find the one with the user's id
+        //             if it exists check if is deleted
+
+            // check if pokemon is "deleted"
+        //     if(localpoke.){
+        //     //pokemon does not exist
+        //     console.log("pokemon found to be deleted in the local db")
+        //     return -1;
+        //     }
+        // }
+        
     }
 
 
@@ -570,7 +581,17 @@ function searchForPokemon(pokeName, userID){
 
 }
 
-function searchLocalPokeDB(pokeName, userID){
+function submitPokemonCreationForm() {
+    var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
+    var url = searchOrigPokemon(pokeName);
+    url.then(function(value){ 
+        console.log("DONE THE SEARCH " + value)
+        console.log(value)})
+    return false;
+}
+
+/* gets you all of the pokemon with pokename in the local db*/
+function searchLocalPokeDB(pokeName){
     /*conecting to the database*/
     var MongoClient = require('mongodb').MongoClient
     var url = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db"
@@ -580,12 +601,79 @@ function searchLocalPokeDB(pokeName, userID){
                 db = res
                 
                 // need this to be returned
-                db.collection("sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION").find({name: pokeName, user: userID}, { _id:0, name:1, user:1, }).toArray(function(err, results){
+                db.collection("sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION").find({name: pokeName}, { _id:0, name:1, height:1, weight:1, types:1, speed:1, special_defense:1, special_attack:1, defense:1, attack:1, hp:1, sprites:1, user:1, status:1}).toArray(function(err, results){
                         return results;
-                    })
+                })
                 
     });
 }
+
+/*searches the orig pokeapi for pokemon with name pokeName and returns if exists*/
+function searchOrigPokemon(pokeName){
+    console.log("searching pokeapi")
+    if (pokeName == ""){
+        console.log("input was blank");
+        return;
+    } 
+    pokemonInfoURL = new Promise((resolve, reject) => {
+    
+        /* checking pokemon pages for that pokemon checking by number of sets*/
+        page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
+        $.ajax({type:'GET', url: page, success: function(result){
+                console.log("starting recursive search")
+                resolve(recursivePokeAPISearch(result, pokeName, 0));
+            },
+            error: function(request, status, error){
+                couldNotAccessAPIError(request, status, error);
+            }
+        })
+        console.log("functional program language :(")
+    })
+    return pokemonInfoURL;
+}
+
+/*recursively handling ajax request for pokemon searches*/
+function recursivePokeAPISearch(result, pokeName, offset){
+    //return new Promise((resolve, reject) => {
+        console.log("recursive searching" + offset)
+        var pokeFound = false;
+        var pokeinfo = new Promise((resolve, reject) => {
+            console.log("starting promise")
+            for(let pkmon of result.results){
+                console.log(pkmon.name)
+                if(pkmon.name == pokeName && !pokeFound){
+                    pokeFound = true;
+                    console.log("found pokemon")
+                    resolve(pkmon.url); 
+                }
+            }
+            if(!pokeFound && offset < 950){
+                pkOffset = offset + 50;
+                page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=" + pkOffset;
+                console.log("doing another get request" + page)
+                $.ajax({type:'GET', url: page, success: function(result){
+                        console.log("resolving promise with recusive call promise")
+                        resolve(recursivePokeAPISearch(result, pokeName, pkOffset))
+                        //return recursivePokeAPISearch(result, pokeName, pkOffset);
+                    }, error: function(request, status, error){
+                        couldNotAccessAPIError(request, status, error)
+                        reject(null);
+                    }
+                })
+            }else{
+                if(offset >= 950){
+                    console.log("pokemon <" + pokeName + "> could not be found in pokeAPI")
+                    reject(null);
+                }
+            }
+        })
+        console.log("finishing recursive search")
+        return pokeinfo;    
+}
+
+
+
+
 
 function getCookie(string){
     return "username";
