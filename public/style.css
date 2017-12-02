@@ -1,0 +1,61 @@
+.main {
+    padding: 15px;
+}
+.row {
+    padding-right: 15px;
+    padding-top: 15px;
+}
+.header {
+    border-style: solid;
+    border-width: thin;
+    padding: 20px;
+    background: turquoise;
+}
+.nav-box {
+    padding: 15px;
+    border-style: solid;
+    border-width: thin;
+    background: turquoise;
+}
+.nav-item {
+    padding: 10px;
+    margin: 10px 0 5px 0;
+    width: 100%;
+    background: white;
+}
+
+.display-stats ul {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+#comp-disp-0 ul {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+#comp-disp-1 ul {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+table, th, td {
+    width: 100%;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 5px;
+    text-align: left;    
+}
+input {
+    margin: 5px 10px 5px 10px;
+}
+
+figcaption {
+    font-size: 75%;
+}
+figure {
+    display: inline-block;
+}
