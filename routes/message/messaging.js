@@ -6,7 +6,7 @@ var ObjectId = require('mongodb').ObjectID;
 var MongoDBUrl = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db";
 var messageCollection = "sweet-and-spicy-grilled-pineapple-messages-COLLECTION";
 
-var messageAge = 3; // messages older than this number of messages are not considered "new" unless they are unread
+var messageAge = 3; // messages older than this number (in minutes) are not considered "new" unless they are unread
 
 
 /* Routes relative to /api/messages */
