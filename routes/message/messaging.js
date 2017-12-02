@@ -64,6 +64,18 @@ router.post('/', function(req, res) {
 	});
 });
 
+// Delete all read messages
+router.delete('/clear', function(req, res) {
+	deleteAllRead()
+	.then(num => {
+		res.send("Deleted " + num + " read message(s)\n");
+	})
+	.catch(err => {
+		res.send("Failed to delete all read messages\n");
+	});
+})
+
+// Delete message with ID
 router.delete('/:ID', function(req, res) {
 
 	var id = req.params.ID;
@@ -178,6 +190,27 @@ function deleteMessage(mID) {
 					reject(err);
 				}
 				resolve(mID);
+			});
+		});
+	});
+}
+
+// Delete all read messages
+function deleteAllRead() {
+	return new Promise((resolve, reject) => {
+		MongoClient.connect(MongoDBUrl, function(err,res) {
+			if (err) {
+				console.log(err);
+				reject(err);
+			}
+			db = res;
+
+			db.collection(messageCollection).deleteMany({status: /^read/}, function(err, res) {
+				if (err) {
+					console.log(err);
+					reject(err);
+				}
+				resolve(res.deletedCount);
 			});
 		});
 	});
