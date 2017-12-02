@@ -6,6 +6,8 @@ var ObjectId = require('mongodb').ObjectID;
 var MongoDBUrl = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db";
 var messageCollection = "sweet-and-spicy-grilled-pineapple-messages-COLLECTION";
 
+var messageAge = 3; // messages older than this number of messages are not considered "new" unless they are unread
+
 
 /* Routes relative to /api/messages */
 
@@ -23,8 +25,24 @@ router.get('/', function(req, res) {
 // Retrieve all messages that should be displayed on the page
 router.get('/show', function(req, res) {
 
-	// TODO
-	res.json({message: "some messages.."});
+	var now = Date.now();
+	// Get all "new" messages
+	// We'll define "new" as having a status of "unread" or < messageAge minutes old
+	getNewMessages(now, messageAge)
+	.then(data => {
+		// Mark all new messages as "read"
+		markAsRead(now, messageAge)
+		.then(updated => {
+			// Send the response (all new messages)
+			res.json({messages: data});
+		})
+		.catch(err => {
+			res.send("Failed to GET new messages\n");
+		})
+	})
+	.catch(err => {
+		res.send("Failed to GET new messages\n");
+	})
 
 });
 
@@ -70,9 +88,52 @@ function getAll() {
 				reject(err);
 			}
 			db = res;
-			db.collection(messageCollection).find({},{status:0, time:0}).toArray(function(err, results){
+			db.collection(messageCollection).find({},{status:0, time:0}).toArray(function(err, results) {
 		    	resolve(results);
 		    });
+		});
+	});
+}
+
+// Get all messages that are unread or less than age minutes old
+function getNewMessages(now, age) {
+	return new Promise((resolve, reject) => {
+		MongoClient.connect(MongoDBUrl, function(err,res) {
+			if (err) {
+				console.log(err);
+				reject(err);
+			}
+			db = res;
+
+			var dateDiff = now - age*60*1000;
+			db.collection(messageCollection).find({ $or: [
+						{status:/unread/}, 
+						{time: {$gt: dateDiff}}
+					]}, 
+					{_id:0, text:1, time:1}).toArray(function(err, results) {
+				resolve(results);
+			});
+		});
+	});
+}
+
+// Set status of each new message to "read"
+function markAsRead(now, age) {
+	return new Promise((resolve, reject) => {
+		MongoClient.connect(MongoDBUrl, function(err,res) {
+			if (err) {
+				console.log(err);
+				reject(err);
+			}
+			db = res;
+
+			var dateDiff = now - age*60*1000;
+			db.collection(messageCollection).updateMany({ $or: [
+						{status:/unread/}, 
+						{time: {$gt: dateDiff}}
+					]}, 
+					{$set: {status: "read"}});
+			resolve(true);
 		});
 	});
 }
@@ -87,7 +148,8 @@ function putMessage(message, stat) {
 		    }
 		    db = res;
 		               
-		    db.collection(messageCollection).insertOne({text: message, status: stat, time: Date.now()}, function(err, res){
+		    db.collection(messageCollection).insertOne(
+		    		{text: message, status: stat, time: Date.now()}, function(err, res){
 		    	if (err) {
 		    		console.log(err);
 		    		reject(err);
