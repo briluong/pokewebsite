@@ -500,10 +500,12 @@ function submitPokemonCreationForm() {
             }
             else{
                 //store all info into a pokemon object and submit the pokemon
-                var types = [$("#create-poke-type1").val()];
+                var type = {'name': $("#create-poke-type1").val()};
+                var types = [type];
                 if($("#create-poke-type2").val() !== ""){
                     console.log("poke type2");
-                    types.push($("#create-poke-type2").val());
+                    var type2 = {'name': $("#create-poke-type2").val()}
+                    types.push(type2);
                 }
 
                 var pokeImg = $("#create-poke-image").val();
@@ -516,12 +518,12 @@ function submitPokemonCreationForm() {
                     'height': $("#create-poke-height").val(),
                     'weight': $("#create-poke-weight").val(),
                     'types': types,
-                    'speed': $("#create-poke-speed").val(),
-                    'special_defense': $("#create-poke-special-defense").val(),
-                    'special_attack': $("#create-poke-special-attack").val(),
-                    'defense': $("#create-poke-defense").val(),
-                    'attack': $("#create-poke-attack").val(),
-                    'hp': $("#create-poke-hp").val(),
+                    'stats': [{"stat": {"url": "https://pokeapi.co/api/v2/stat/6/", "name": "speed"}, "base_stat": $("#create-poke-speed").val()},
+                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/5/", "name": "special-defense"}, "base_stat": $("#create-poke-special-defense").val()},
+                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/4/", "name": "special-attack"}, "base_stat": $("#create-poke-special-attack").val()},
+                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/3/", "name": "defense"}, "base_stat": $("#create-poke-defense").val()},
+                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/2/", "name": "attack"}, "base_stat": $("#create-poke-attack").val()},
+                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/1/", "name": "hp"}, "base_stat": $("#create-poke-hp").val()}],
                     'sprites': {'front_default': pokeImg},
                     'user': user,
                     'status': $('input[name=status]:checked').val() // public, private
@@ -549,6 +551,7 @@ function submitPokemonCreationForm() {
         return false;
     }
 }
+
 
 
 /* puts pokemon into db*/
