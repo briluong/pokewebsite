@@ -1,4 +1,4 @@
-var MongoClient = require('mongodb').MongoClient;
+//var MongoClient = require('mongodb').MongoClient;
 var MongoDBUrl = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db";
 var pokeCollection = "sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION";
 
