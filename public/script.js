@@ -1,4 +1,4 @@
-var MongoClient = require('mongodb').MongoClient;
+//var MongoClient = require('mongodb').MongoClient;
 var MongoDBUrl = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db";
 var pokeCollection = "sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION";
 
@@ -376,6 +376,7 @@ function createCreatePokeView() {
             $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
             $('<button/>', {'id': 'preview-button', 'text': "Preview"})
         ),
+        //$('<form/>', {'name': 'create-poke-name-submission-page', 'id': 'create-poke-form', "action":"http://localhost:8080/api/pokemon", "method":"post"}).append(
         $('<form/>', {'name': 'create-poke-name-submission-page', 'id': 'create-poke-form', "onsubmit":"return submitPokemonCreationForm()", "method":"post"}).append(
             // $('<div/>', {'class': 'create-poke-image'}).append(
             //     $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
@@ -482,7 +483,6 @@ function submitPokemonCreationForm() {
     var user = getCookie("username");
     // check if pokemon name already in directory
     var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
-    var status = $('input[name=status]:checked').val();
     if(!isValidPokemonCreation()){
         alert("page is missing input, please fill in all the fields provided");
         return false; 
@@ -491,46 +491,100 @@ function submitPokemonCreationForm() {
     else{
         console.log("page is valid");
         
-        var pokemon = createPokemonCheck(pokeName, status);
+        var pokemon = createPokemonCheck(pokeName, user);
 
+        pokemon.then(exists => {
+            if(exists !== null){
+                alert("pokemon with this name already exists, please enter a new name");
+                return false;
+            }
+            else{
+                //store all info into a pokemon object and submit the pokemon
+                var types = [$("#create-poke-type1").val()];
+                if($("#create-poke-type2").val() !== ""){
+                    console.log("poke type2");
+                    types.push($("#create-poke-type2").val());
+                }
+
+                var pokeImg = $("#create-poke-image").val();
+                if(pokeImg == ""){
+                    pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
+                }
+
+                var pokemon = {
+                    'name': pokeName,
+                    'height': $("#create-poke-height").val(),
+                    'weight': $("#create-poke-weight").val(),
+                    'types': types,
+                    'speed': $("#create-poke-speed").val(),
+                    'special_defense': $("#create-poke-special-defense").val(),
+                    'special_attack': $("#create-poke-special-attack").val(),
+                    'defense': $("#create-poke-defense").val(),
+                    'attack': $("#create-poke-attack").val(),
+                    'hp': $("#create-poke-hp").val(),
+                    'sprites': {'front_default': pokeImg},
+                    'user': user,
+                    'status': $('input[name=status]:checked').val() // public, private
+                }
+                //submit to db
+                submitPokemonToDB(pokemon).then(data =>{
+                    if(data == "ok"){
+                        console.log("successfully inserted <" + pokeName + "> into database")
+                        return true;    
+                    }
+                    
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("could not create pokemon due to: " + err);
+                    return false;
+                })
+            }    
+        }).catch(err => {
+            console.log(err);
+            return false;
+        })
         //if pokemon already exists prompt user to come up with a new name
-        if(pokemon){
-            alert("pokemon with this name already exists, please enter a new name");
-            return false;
-        }
-        else{
-            //store all info into a pokemon object and submit the pokemon
-            var types = [$("#create-poke-type1").val()];
-            if($("#create-poke-type2").val() !== ""){
-                console.log("poke type2");
-                types.push($("#create-poke-type2").val());
-            }
-
-            var pokeImg = $("#create-poke-image").val();
-            if(pokeImg == ""){
-                pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
-            }
-
-            var pokemon = {
-                'name': pokeName,
-                'height': $("#create-poke-height").val(),
-                'weight': $("#create-poke-weight").val(),
-                'types': types,
-                'speed': $("#create-poke-speed").val(),
-                'special_defense': $("#create-poke-special-defense").val(),
-                'special_attack': $("#create-poke-special-attack").val(),
-                'defense': $("#create-poke-defense").val(),
-                'attack': $("#create-poke-attack").val(),
-                'hp': $("#create-poke-hp").val(),
-                'sprites': {'front_default': pokeImg},
-                'user': user,
-                'status': status //del, public, private
-            }
-            //submit to db
-            console.log(pokemon);
-            return false;
-        }
+        // move into promise thing pls
+        return false;
     }
+}
+
+
+/* puts pokemon into db*/
+function submitPokemonToDB(pokemon){
+    /*conecting to the database*/
+    return new Promise((resolve, reject) =>{
+        MongoClient.connect(MongoDBUrl, function(err,res){
+            if(err){
+              console.log(err);
+              reject(err);
+              db.close();
+              return; 
+            } 
+            console.log("prepping Database for submition");
+            db = res
+            // need this to be returned
+            db.collection(pokeCollection).insertOne(pokemon, function(err, res){
+            //continue
+                if(err){
+                  console.log(err);
+                  reject(err); 
+                }
+                var jsonRes = JSON.parse(res);
+                if(jsonRes.ok == 1){
+                    console.log("inserted " + pokemon.name + " into database")
+                    resolve("ok");   
+                }
+                else{
+                    console.log("response not ok: " + res)
+                    reject(res);
+                }
+                db.close();
+                return
+            });                    
+        });
+    }) 
 }
 
 /*validates the pokemon creation page */
@@ -552,7 +606,25 @@ function isValidPokemonCreation(){
     //return false
 }
 
-function createPokemonCheckPublic(pokeName){
+
+/*REMOVE THIS LATER*/
+// function submitPokemonCreationForm() {
+//     console.log("submit pokemon")
+//     // check if pokemon name already in directory
+//     var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
+//     var pokemon = createPokemonCheck(pokeName);
+//     pokemon.then(data=>{
+//         console.log(data);
+//     }).catch(err=>{
+//         console.log(err);
+//     })  
+//     return false;
+// }
+
+
+
+/*ensures there are no overlaps in the db*/
+function createPokemonCheck(pokeName, user){
     return new Promise((resolve, reject) => {
         if (pokeName == ""){
             console.log('input was blank');
@@ -573,6 +645,11 @@ function createPokemonCheckPublic(pokeName){
                 for(index = 0; index < data.length; index++){
                     if(data[index].status == "public"){
                         console.log("<" + pokeName + "> is already taken");
+                        resolve(data[index]);
+                        return;
+                    }
+                    else if(data[index].user == user){
+                        console.log("user already made pokemon with name <" + pokeName + ">");
                         resolve(data[index]);
                         return;
                     }
@@ -603,12 +680,12 @@ function createPokemonCheckPublic(pokeName){
                 }
             })
             .catch(err => {
-                console.log(error)
+                console.log(err)
             })
 
         })
         .catch(err => {
-            reject(error)
+            reject(err)
         })
 
     })
@@ -633,8 +710,6 @@ function searchLocalPokeDB(pokeName){
             })     
         });
     }) 
-    
-
 }
 
 /*searches the orig pokeapi for pokemon with name pokeName and returns a promise with url if exists or null if it doesn't*/
