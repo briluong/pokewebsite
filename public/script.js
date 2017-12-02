@@ -500,11 +500,11 @@ function submitPokemonCreationForm() {
             }
             else{
                 //store all info into a pokemon object and submit the pokemon
-                var type = {'name': $("#create-poke-type1").val()};
+                var type = {"slot": 1, "type" : {'name': $("#create-poke-type1").val()}};
                 var types = [type];
                 if($("#create-poke-type2").val() !== ""){
                     console.log("poke type2");
-                    var type2 = {'name': $("#create-poke-type2").val()}
+                    var type2 = {"slot": 2, "type" : {'name': $("#create-poke-type2").val()}}
                     types.push(type2);
                 }
 
@@ -532,7 +532,8 @@ function submitPokemonCreationForm() {
                 submitPokemonToDB(pokemon).then(data =>{
                     if(data == "ok"){
                         console.log("successfully inserted <" + pokeName + "> into database")
-                        return true;    
+                        successfulPokemonSubmition(pokemon);
+                        return false;// change to true    
                     }
                     
                 })
@@ -777,9 +778,18 @@ function recursivePokeAPISearch(result, pokeName, offset){
         return pokeinfo;    
 }
 
-
-
-
+function successfulPokemonSubmition(pokemon){
+    $(".inner-content").html("");
+    $(".inner-content").append(
+        $('<div/>', {'class': 'display-stats'}).append(
+            $('<p/>').html("Pokemon successfully added to the database!"),
+            $('<button/>', {'id': 'create-another', text: "Create Another!"})
+        )
+    );
+    renderPokemonStats(pokemon, $(".inner-content"), "1");
+    $("#create-another").on("click", createCreatePokeView);
+    return;
+}
 
 function getCookie(string){
     return "username";
