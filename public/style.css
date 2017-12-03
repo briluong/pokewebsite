@@ -6,22 +6,50 @@
     padding-top: 15px;
 }
 .header {
-    border-style: solid;
-    border-width: thin;
+    border-style: none;
     padding: 20px;
     background: turquoise;
 }
+.title {
+    padding: 10px;
+    color: white;
+    font-family: "Lucida Console";
+    font-size: 20px;
+}
 .nav-box {
     padding: 15px;
-    border-style: solid;
-    border-width: thin;
+    border-style: none;
     background: turquoise;
+    color: white;
+    text-align: center;
 }
 .nav-item {
     padding: 10px;
     margin: 10px 0 5px 0;
     width: 100%;
     background: white;
+    border-radius: 10px;
+    color: black;
+}
+li.nav-item:hover {
+    background: teal;
+    color: white;
+}
+li.nav-item:active {
+    background: white;
+}
+
+.status-box {
+    padding: 5px;
+    font-size: 12px;
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+}
+.status-box ul {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0;
 }
 
 .display-stats ul {
@@ -40,10 +68,16 @@
     padding-left: 0;
 }
 
+
+button:focus {
+    background: turquoise;
+}
+
 table, th, td {
     width: 100%;
     border: 1px solid black;
     border-collapse: collapse;
+    border-color: darkgray;
 }
 th, td {
     padding: 5px;

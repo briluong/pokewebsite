@@ -724,5 +724,28 @@ $(document).ready(function(){
     $("#single-poke").on("click", createSinglePokeView);
     $("#compare-poke").on("click", createPokeCompareView);
     $("#create-poke").on("click", createCreatePokeView);
-});
 
+    //Check for status updates
+    (function updater() {
+        $.ajax({
+            url: '/api/messages/show', 
+            success: function(data) {
+                $("#messages-list").html("");
+                if (data.messages.length == 0) {
+                    $("#messages-list").append($('<li/>', {text: "No new messages"}));
+                }
+                data.messages.forEach(function(elem, i) {
+                    var time = new Date();
+                    time.setTime(elem.time);
+                    $("#messages-list").append(
+                        $('<li/>', {text: time.toLocaleTimeString() + " " + elem.text})
+                    );
+                });
+            },
+            complete: function() {
+                // Schedule the next request 10s after the current one is complete
+                setTimeout(updater, 10000);
+            }
+        });
+    })();
+});
