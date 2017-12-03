@@ -20,6 +20,8 @@
     padding: 15px;
     border-style: none;
     background: turquoise;
+    color: white;
+    text-align: center;
 }
 .nav-item {
     padding: 10px;
@@ -27,6 +29,7 @@
     width: 100%;
     background: white;
     border-radius: 10px;
+    color: black;
 }
 li.nav-item:hover {
     background: teal;
