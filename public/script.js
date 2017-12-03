@@ -119,87 +119,53 @@ function getRandomPokemon(event) {
 /* Check that input is formFilledby querying API and display Pokemon stats
  */
 
-function displayPokemonStats(input) {
-    pokemon = $(input).val().toLowerCase().replace(/ /g, "-");
-
-    pokemonInfo = null;
-    /* TODO query API and if data is valid, display stats in $(.display-stats) */
-    /* checking pokemon pages for that pokemon checking by number of sets*/
-    page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
-    $.ajax({type:'GET', url: page, success: function(result){
-        recursiveAjaxSearch(result, input, 0, input);
-    },
-    error: function(request, status, error){
-        couldNotAccessAPIError(request, status, error);
-    }
-    })
-}
-
-
+/* Check that input is formFilledby querying API and display Pokemon stats
+ */
 var dl_load = false;
 var rl_load = false;
 var load_complete = dl_load && dr_load;
 
-/*recursively handling ajax request for pokemon searches*/
-function recursiveAjaxSearch(result, input, offset, input){
-    var pokeFound = false;
-    pokemon = $(input).val();
-        if (pokemon == ""){
-        alert('You input is blank, please input.');
+function displayPokemonStats(input) {
+    var pokemon = $(input).val().toLowerCase().replace(/ /g, "-");
+
+    //pokemonInfo = null;
+    /* TODO query API and if data is valid, display stats in $(.display-stats) */
+    /* checking pokemon pages for that pokemon checking by number of sets*/
+    //page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
+    var query = "/api/pokemon/" + pokemon;
+    //$.ajax({type:'GET', url: page, success: function(result){
+    //    recursiveAjaxSearch(result, input, 0, input);
+    $.ajax({type:'GET', url: query, success: function(result){
+        if (input == "#single-input") {
+            $(".display-stats").empty();
+            display_field = $(".display-stats");
+            i = 0;
+        }
+        else if (input == "#input-0") {
+            // clear current field
+            $("#comp-disp-0").html("");
+            display_field = $("#comp-disp-0");
+            dl_load = true;
+            load_complete = dl_load && dr_load;
+            console.log("Complete after load pokemon1:"+load_complete);
+            i = 1;
+        }
+        else if (input == "#input-1") {
+            $("#comp-disp-1").html("");
+            display_field = $("#comp-disp-1");
+            dr_load = true;
+            load_complete = dl_load && dr_load;
+            console.log("Complete after load pokemon2:"+load_complete);
+            i = 2;
+        }
+        renderPokemonStats(result, display_field, i.toString())
+        handle_load(load_complete);
         return;
-    } else {
-        for(var pkmon of result.results){
-            if(pkmon.name == pokemon){
-                pokeFound = true;
-                console.log("looking up " + pokemon);
-                $.ajax({type:'GET', url: pkmon.url, success: function(result){
-                    if (input == "#single-input") {
-                        $(".display-stats").empty();
-                        display_field = $(".display-stats");
-                        i = 0;
-                        }
-                    else if (input == "#input-0") {
-                        // clear current field
-                        $("#comp-disp-0").html("");
-                        display_field = $("#comp-disp-0");
-                        dl_load = true;
-                        load_complete = dl_load && dr_load;
-                        console.log("Complete after load pokemon1:"+load_complete);
-                        i = 1; 
-                    }
-                    else if (input == "#input-1") {
-                        $("#comp-disp-1").html("");
-                        display_field = $("#comp-disp-1");
-                        dr_load = true;
-                        load_complete = dl_load && dr_load;
-                        console.log("Complete after load pokemon2:"+load_complete);
-                        i = 2;
-                    }
-                    renderPokemonStats(result, display_field, i.toString());
-                    handle_load(load_complete);
-                    return;
-                },
-                error: function(request, status, error){
-                    couldNotAccessAPIError(request, status, error)
-                }
-                })
-            }
-        }
-        if(!pokeFound && offset < 950){
-            pkOffset = offset + 50;
-            page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=" + pkOffset;
-            $.ajax({type:'GET', url: page, success: function(result){
-                recursiveAjaxSearch(result, pokemon, pkOffset, input)
-            }, error: function(request, status, error){
-                couldNotAccessAPIError(request, status, error)
-            }
-            })
-        }else{
-            if(offset >= 950){
-                alert("could not find pokemon <" + pokemon + "> please try another");
-            }
-        }
+    },
+    error: function(request, status, error){
+        alert(error);
     }
+    })
 }
 
 
