@@ -148,7 +148,7 @@ function recursiveAjaxSearch(result, input, offset, input){
         alert('You input is blank, please input.');
         return;
     } else {
-        for(let pkmon of result.results){
+        for(var pkmon of result.results){
             if(pkmon.name == pokemon){
                 pokeFound = true;
                 console.log("looking up " + pokemon);
@@ -376,37 +376,32 @@ function createCreatePokeView() {
             $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
             $('<button/>', {'id': 'preview-button', 'text': "Preview"})
         ),
-        //$('<form/>', {'name': 'create-poke-name-submission-page', 'id': 'create-poke-form', "action":"http://localhost:8080/api/pokemon", "method":"post"}).append(
-        $('<form/>', {'name': 'create-poke-name-submission-page', 'id': 'create-poke-form', "onsubmit":"return submitPokemonCreationForm()", "method":"post"}).append(
-            // $('<div/>', {'class': 'create-poke-image'}).append(
-            //     $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
-            $('<input/>', {'type': 'text', 'id': 'create-poke-image', 'placeholder': "image url", 'size': "15"}),
-            //     $('<button/>', {'id': 'preview-button', 'text': "Preview"})
-            // ),
+        $('<form/>', {'name': 'create-poke-name-submission-page', 'id': 'create-poke-form', "onsubmit":"return submitPokemonCreationForm()"}).append(
+            $('<input/>', {'type': 'text', 'name': 'pokeimage', 'placeholder': "image url", 'size': "15"}),
             $('<table/>', {'id':'stats'}).append(
                 $('<tr/>', {'id': 'name'}).append(
                     $('<th/>').html("Name:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-name', 'placeholder': "Pokemon Name", 'maxlength': "11", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'pokename', 'placeholder': "Pokemon Name", 'maxlength': "11", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'height'}).append(
                     $('<th/>').html("Height:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-height', 'placeholder': "height in cm", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'height', 'placeholder': "height in cm", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'weight'}).append(
                     $('<th/>').html("Weight:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-weight', 'placeholder': "weight in kg", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'weight', 'placeholder': "weight in kg", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'types'}).append(
                     $('<th/>').html("Types:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-type1', 'placeholder': "normal", 'size': "15"}),
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-type2', 'placeholder': "type2, optional", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'type1', 'placeholder': "normal", 'size': "15"}),
+                        $('<input/>', {'type': 'text', 'name': 'type2', 'placeholder': "type2, optional", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'base-stats'}).append(
@@ -415,37 +410,37 @@ function createCreatePokeView() {
                 $('<tr/>', {'id': 'speed'}).append(
                     $('<th/>').html("Speed:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-speed', 'placeholder': "1", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'speed', 'placeholder': "1", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'special-defense'}).append(
                     $('<th/>').html("Special-defense:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-special-defense', 'placeholder': "1",'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'spcdefense', 'placeholder': "1",'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'special-attack'}).append(
                     $('<th/>').html("Special attack:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-special-attack', 'placeholder': "1", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'spcattack', 'placeholder': "1", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'defense'}).append(
                     $('<th/>').html("Defense:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-defense', 'placeholder': "1", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'defense', 'placeholder': "1", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'attack'}).append(
                     $('<th/>').html("Attack:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text', 'id': 'create-poke-attack', 'placeholder': "1", 'size': "15"})
+                        $('<input/>', {'type': 'text', 'name': 'attack', 'placeholder': "1", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'hp'}).append(
                     $('<th/>').html("Hp:"),
                     $('<td/>').append(
-                        $('<input/>', {'type': 'text','id': 'create-poke-hp', 'placeholder': "1", 'size': "15"})
+                        $('<input/>', {'type': 'text','name': 'hp', 'placeholder': "1", 'size': "15"})
                     )
                 ),
                 $('<tr/>', {'id': 'private-status'}).append(
@@ -463,12 +458,79 @@ function createCreatePokeView() {
     );
 
     $("#preview-button").on("click", previewImage);
-    //$("#create-poke-name-submit").on("click", submitPokemonCreationForm);
+}
+/**/
+function submitPokemonCreationForm(){
+    if(isValidPokemonCreationForm()){
+        var pokemon = getPokeModel();
+        $.ajax({
+        type: 'POST',
+        url: "http://localhost:8080/api/pokemon/",
+        data: pokemon,
+        success: function(data){
+             successfulPokemonSubmission(data);
+        },
+        error: function(xhr) {
+            if(xhr.status == 409){
+            console.log("pokemon found in db or pokeapi");
+                alert("this name is already in use, please pick another");
+            }
+            else{
+            console.log(xhr.status + " error has occured");
+                alert("An error has occurred, please try again later");         
+            }
+        }
+        })
+    }
+    return false;
+}
+
+function getPokeModel(){
+    var pokeImg = $("input[name=pokeimage]").val();
+    if(pokeImg==""){
+        pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
+    }
+    var pokemon = {'pokename': $("input[name=pokename]").val(),
+                    'height': $("input[name=height]").val(),
+                    'weight': $("input[name=weight]").val(),
+                    'type1': $("input[name=type1]").val(),
+                    'type2': $("input[name=type2]").val(),
+                    'speed': $("input[name=speed]").val(),
+                    'spcdefense': $("input[name=spcdefense]").val(),
+                    'spcattack': $("input[name=spcattack]").val(),
+                    'defense': $("input[name=defense]").val(),
+                    'attack': $("input[name=attack]").val(),
+                    'hp': $("input[name=hp]").val(),
+                    'pokeimage': pokeImg,
+                    'status': $('input[name=status]:checked').val()
+                }
+    return pokemon;
+}
+
+
+/*validates the pokemon creation page */
+function isValidPokemonCreationForm(){
+    console.log("validating pokemon creation form")
+    var formFilled= true;
+    $("#create-poke-form input[type=text]").each(function(){
+        console.log($(this).val())
+        if($(this).val()==""){
+            console.log($(this).attr("id"))
+            if($(this).attr("name")!=="type2" && $(this).attr("name")!=="pokeimage"){
+                formFilled= false;
+                return false;
+            }
+        }
+    });
+    if(!formFilled){
+    alert("page is missing input, please fill in all the fields provided");
+    }
+    return formFilled;
 }
 
 function previewImage() {
     console.log("preview image");
-    url = $("#create-poke-image").val();
+    url = $("input[name=pokeimage]").val();
     console.log(url);
     if(url==""){
         url = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
@@ -477,308 +539,10 @@ function previewImage() {
     return;
 }
 
-/* Submits the pokemon to the db if is valid*/
-function submitPokemonCreationForm() {
-    console.log("submit pokemon")
-    var user = getCookie("username");
-    // check if pokemon name already in directory
-    var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
-    if(!isValidPokemonCreation()){
-        alert("page is missing input, please fill in all the fields provided");
-        return false; 
-        
-    }
-    else{
-        console.log("page is valid");
-        
-        var pokemon = createPokemonCheck(pokeName, user);
-
-        pokemon.then(exists => {
-            if(exists !== null){
-                alert("pokemon with this name already exists, please enter a new name");
-                return false;
-            }
-            else{
-                //store all info into a pokemon object and submit the pokemon
-                var type = {"slot": 1, "type" : {'name': $("#create-poke-type1").val()}};
-                var types = [type];
-                if($("#create-poke-type2").val() !== ""){
-                    console.log("poke type2");
-                    var type2 = {"slot": 2, "type" : {'name': $("#create-poke-type2").val()}}
-                    types.push(type2);
-                }
-
-                var pokeImg = $("#create-poke-image").val();
-                if(pokeImg == ""){
-                    pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";
-                }
-
-                var pokemon = {
-                    'name': pokeName,
-                    'height': $("#create-poke-height").val(),
-                    'weight': $("#create-poke-weight").val(),
-                    'types': types,
-                    'stats': [{"stat": {"url": "https://pokeapi.co/api/v2/stat/6/", "name": "speed"}, "base_stat": $("#create-poke-speed").val()},
-                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/5/", "name": "special-defense"}, "base_stat": $("#create-poke-special-defense").val()},
-                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/4/", "name": "special-attack"}, "base_stat": $("#create-poke-special-attack").val()},
-                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/3/", "name": "defense"}, "base_stat": $("#create-poke-defense").val()},
-                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/2/", "name": "attack"}, "base_stat": $("#create-poke-attack").val()},
-                              {"stat": {"url": "https://pokeapi.co/api/v2/stat/1/", "name": "hp"}, "base_stat": $("#create-poke-hp").val()}],
-                    'sprites': {'front_default': pokeImg},
-                    'user': user,
-                    'status': $('input[name=status]:checked').val() // public, private
-                }
-                //submit to db
-                submitPokemonToDB(pokemon).then(data =>{
-                    if(data == "ok"){
-                        console.log("successfully inserted <" + pokeName + "> into database")
-                        successfulPokemonSubmition(pokemon);
-                        return false;// change to true    
-                    }
-                    
-                })
-                .catch(err => {
-                    console.log(err);
-                    alert("could not create pokemon due to: " + err);
-                    return false;
-                })
-            }    
-        }).catch(err => {
-            console.log(err);
-            return false;
-        })
-        //if pokemon already exists prompt user to come up with a new name
-        // move into promise thing pls
-        return false;
-    }
-}
 
 
 
-/* puts pokemon into db*/
-function submitPokemonToDB(pokemon){
-    /*conecting to the database*/
-    return new Promise((resolve, reject) =>{
-        MongoClient.connect(MongoDBUrl, function(err,res){
-            if(err){
-              console.log(err);
-              reject(err);
-              db.close();
-              return; 
-            } 
-            console.log("prepping Database for submition");
-            db = res
-            // need this to be returned
-            db.collection(pokeCollection).insertOne(pokemon, function(err, res){
-            //continue
-                if(err){
-                  console.log(err);
-                  reject(err); 
-                }
-                var jsonRes = JSON.parse(res);
-                if(jsonRes.ok == 1){
-                    console.log("inserted " + pokemon.name + " into database")
-                    resolve("ok");   
-                }
-                else{
-                    console.log("response not ok: " + res)
-                    reject(res);
-                }
-                db.close();
-                return
-            });                    
-        });
-    }) 
-}
-
-/*validates the pokemon creation page */
-function isValidPokemonCreation(){
-    console.log("validating pokemon creation form")
-    var formFilled= true;
-    $("#create-poke-form input[type=text]").each(function(){
-        console.log($(this).val())
-        if($(this).val()==""){
-            console.log($(this).attr("id"))
-            if($(this).attr("id")!=="create-poke-type2" && $(this).attr("id")!=="create-poke-image"){
-                formFilled= false;
-                return false;
-            }
-        }
-    });
-
-    return valid;
-    //return false
-}
-
-
-/*REMOVE THIS LATER*/
-// function submitPokemonCreationForm() {
-//     console.log("submit pokemon")
-//     // check if pokemon name already in directory
-//     var pokeName = $("#create-poke-name").val().toLowerCase().replace(/ /g, "-");
-//     var pokemon = createPokemonCheck(pokeName);
-//     pokemon.then(data=>{
-//         console.log(data);
-//     }).catch(err=>{
-//         console.log(err);
-//     })  
-//     return false;
-// }
-
-
-
-/*ensures there are no overlaps in the db*/
-function createPokemonCheck(pokeName, user){
-    return new Promise((resolve, reject) => {
-        if (pokeName == ""){
-            console.log('input was blank');
-            alert('input was blank');
-            reject("input was blank");
-        }
-
-        pokeWithPokeName = null;
-
-        var localPokes = searchLocalPokeDB(pokeName);
-        // this is not null or empty
-        localPokes
-        .then(data => {
-            console.log("retrieved <" + pokeName + "> form local db");
-            console.log(data);
-            //data should be an array or is null
-            if(data.length > 0){
-                for(index = 0; index < data.length; index++){
-                    if(data[index].status == "public"){
-                        console.log("<" + pokeName + "> is already taken");
-                        resolve(data[index]);
-                        return;
-                    }
-                    else if(data[index].user == user){
-                        console.log("user already made pokemon with name <" + pokeName + ">");
-                        resolve(data[index]);
-                        return;
-                    }
-                }
-
-            }
-            // then check other promise/ pokeapi
-            var pokeUrl = searchOrigPokemon(pokeName);
-            pokeUrl
-            .then(data => {
-                console.log("Function 1: Pokemon list")
-                console.log(data)
-                if(data !== null){
-                    $.ajax({type:'GET', url: data, success: function(result){
-                            console.log("retrieving pokemon from pokeapi")
-                            resolve(result);
-                            return;
-                            //return recursivePokeAPISearch(result, pokeName, pkOffset);
-                        }, error: function(request, status, error){
-                            couldNotAccessAPIError(request, status, error);
-                            reject(error);
-                        }
-                    })   
-                }
-                else{
-                    // no pokemone with that name exists
-                    resolve(null);
-                }
-            })
-            .catch(err => {
-                console.log(err)
-            })
-
-        })
-        .catch(err => {
-            reject(err)
-        })
-
-    })
-    
-}
-
-/* gets you all of the pokemon with pokename in the local db*/
-function searchLocalPokeDB(pokeName){
-    /*conecting to the database*/
-    return new Promise((resolve, reject) =>{
-        MongoClient.connect(MongoDBUrl, function(err,res){
-            if(err){
-              console.log(err);
-              reject(err); 
-            } 
-            console.log("Database created");
-            db = res
-            // need this to be returned
-            db.collection(pokeCollection).find({name: pokeName}, { _id:0, name:1, height:1, weight:1, types:1, speed:1, special_defense:1, special_attack:1, defense:1, attack:1, hp:1, sprites:1, user:1, status:1}).toArray(function(err, results){
-                resolve(results);
-                db.close();
-            })     
-        });
-    }) 
-}
-
-/*searches the orig pokeapi for pokemon with name pokeName and returns a promise with url if exists or null if it doesn't*/
-function searchOrigPokemon(pokeName){
-    console.log("searching pokeapi")
-    if (pokeName == ""){
-        console.log("input was blank");
-        return;
-    } 
-    pokemonInfoURL = new Promise((resolve, reject) => {
-    
-        /* checking pokemon pages for that pokemon checking by number of sets*/
-        page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
-        $.ajax({type:'GET', url: page, success: function(result){
-                console.log("starting recursive search")
-                resolve(recursivePokeAPISearch(result, pokeName, 0));
-            },
-            error: function(request, status, error){
-                couldNotAccessAPIError(request, status, error);
-            }
-        })
-    })
-    return pokemonInfoURL;
-}
-
-/*recursively handling ajax request for pokemon searches*/
-function recursivePokeAPISearch(result, pokeName, offset){
-    //return new Promise((resolve, reject) => {
-        console.log("recursive searching" + offset)
-        var pokeFound = false;
-        var pokeinfo = new Promise((resolve, reject) => {
-            console.log("starting promise")
-            for(let pkmon of result.results){
-                console.log(pkmon.name)
-                if(pkmon.name == pokeName && !pokeFound){
-                    pokeFound = true;
-                    console.log("found pokemon")
-                    resolve(pkmon.url); 
-                }
-            }
-            if(!pokeFound && offset < 950){
-                pkOffset = offset + 50;
-                page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=" + pkOffset;
-                console.log("doing another get request" + page)
-                $.ajax({type:'GET', url: page, success: function(result){
-                        console.log("resolving promise with recusive call promise")
-                        resolve(recursivePokeAPISearch(result, pokeName, pkOffset))
-                        //return recursivePokeAPISearch(result, pokeName, pkOffset);
-                    }, error: function(request, status, error){
-                        couldNotAccessAPIError(request, status, error);
-                        reject(error);
-                    }
-                })
-            }else{
-                if(offset >= 950){
-                    console.log("pokemon <" + pokeName + "> could not be found in pokeAPI")
-                    resolve(null);
-                }
-            }
-        })
-        console.log("finishing recursive search")
-        return pokeinfo;    
-}
-
-function successfulPokemonSubmition(pokemon){
+function successfulPokemonSubmission(pokemon){
     $(".inner-content").html("");
     $(".inner-content").append(
         $('<div/>', {'class': 'display-stats'}).append(
@@ -812,5 +576,29 @@ $(document).ready(function(){
     $("#single-poke").on("click", createSinglePokeView);
     $("#compare-poke").on("click", createPokeCompareView);
     $("#create-poke").on("click", createCreatePokeView);
+
+    //Check for status updates
+    (function updater() {
+        $.ajax({
+            url: '/api/messages/show', 
+            success: function(data) {
+                $("#messages-list").html("");
+                if (data.messages.length == 0) {
+                    $("#messages-list").append($('<li/>', {text: "No new messages"}));
+                }
+                data.messages.forEach(function(elem, i) {
+                    var time = new Date();
+                    time.setTime(elem.time);
+                    $("#messages-list").append(
+                        $('<li/>', {text: time.toLocaleTimeString() + " " + elem.text})
+                    );
+                });
+            },
+            complete: function() {
+                // Schedule the next request 10s after the current one is complete
+                setTimeout(updater, 10000);
+            }
+        });
+    })();
 });
 
