@@ -44,10 +44,7 @@ router.get('/:pokemonId', function(req, res) {
                 }
                 //can't send
                 console.log("pokemon is private, user  does not match : " + data[index]);
-                var err = new Error('this pokemon was made private by the user, could not retrieve data');
-                err.code(409);
-                res.send(err);
-                //res.status(409).send("this pokemon was made private by the user, could not retrieve data");
+                res.status(409).send("this pokemon was made private by the user, could not retrieve data");
             }
             // check the api db
             console.log("checking pokeapi");

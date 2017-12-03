@@ -163,7 +163,16 @@ function displayPokemonStats(input) {
         return;
     },
     error: function(request, status, error){
-        alert(error);
+        console.log(error);
+        if(error == "Conflict"){
+            alert("this pokemon was made private by the user, could not retrieve data");
+        }
+        else if(error == "Bad Request"){
+            alert("this pokemon does not exist, please try another");
+        }
+        else{
+            alert("could not connect to database, please try again later");
+        }
     }
     })
 }
