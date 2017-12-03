@@ -38,6 +38,9 @@ app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
 // routes ======================================================================
+app.use('/api/pokemon', require('./routes/pokemon/pokemon.js'));
+app.use('/api/messages', require('./routes/message/messaging.js'));
+
 require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
