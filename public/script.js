@@ -537,15 +537,6 @@ function attributePP(string) {
     return newstr.charAt(0).toUpperCase() + newstr.slice(1);
 }
 
-
-
-
-
-
-
-
-
-
 /* Create all elements required for the manage Pokemon edit and delete view.
  */
 function createManagePokeView() {
@@ -702,21 +693,22 @@ function deletePokemon(){
 /*TO BE FIXED error stuff*/
 function deleteFromDB(pokeName){
     var pokemon = {'pokename': pokeName};
+    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername;
     $.ajax({
     type: 'DELETE',
-    url: "http://localhost:8080/api/pokemon/",
+    url: query,
     data: pokemon,
     success: function(data){
          successfulPokemonDeletion(data);
     },
     error: function(xhr) {
         if(xhr.status == 409){
-        console.log("pokemon found in db or pokeapi");
-            alert("this name is already in use, please pick another");
+        console.log("cannot delete this pokemon");
+            alert("unauthorized to delete this pokemon?");
         }
         else{
         console.log(xhr.status + " error has occured");
-            alert("");         
+            alert("could not delete pokemon, error occured");         
         }
     }
     })
@@ -752,21 +744,22 @@ function renewPokemon(){
 function submitPokemonUpdateForm(pokename){
     if(isValidPokemonCreationForm()){
         var pokemon = getPokeModel();
+        var query = "/api/pokemon/pokename/" + pokename + "?username=" + localStorage.pokeUsername;
         $.ajax({
         type: 'PUT',
-        url: "/api/pokemon/pokename/" + pokename,
+        url: query,
         data: pokemon,
         success: function(data){
              successfulPokemonUpdate(data);
         },
         error: function(xhr) {
             if(xhr.status == 409){
-            console.log("pokemon found in db or pokeapi");
-                alert("this name is already in use, please pick another");
+            console.log("could not update pokemon in db");
+                alert("unauthorized to edit this pokemon");
             }
             else{
             console.log(xhr.status + " error has occured");
-                alert("An error has occurred, please try again later");         
+                alert("could not update pokemon, error has occured");         
             }
         }
         })
