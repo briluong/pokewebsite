@@ -97,7 +97,7 @@ router.get('/random', function(req, res) {
 router.post('/', function(req, res) {
 	var pokemon = req.body;
 	var pokeName = req.body.pokename;
-	var user = req.body.username;
+	var user = req.body.user;
 	console.log("post request: ") 
     console.log(pokemon);
 	// make sure pokemon with that name doesn't already exist
@@ -507,6 +507,7 @@ function updatePokemonInPokeDB(pokemon){
                 if(err){
                     console.log(err);
                     reject(err);
+                    db.close();
                     return;  
                 }
                 if(sprites !== null){
@@ -516,6 +517,7 @@ function updatePokemonInPokeDB(pokemon){
                             reject(err);  
                         }
                         console.log("successfully updated sprites");
+                        db.close();
                         return;
                     }) 
                 }
@@ -523,9 +525,10 @@ function updatePokemonInPokeDB(pokemon){
                 db.collection(pokeCollection).find({name: pokename}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
                     console.log(results);
                     resolve(results);
+                    db.close();
+                    return;
                 })
             });
-            db.close();     
         });
     })   
 }
