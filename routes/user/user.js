@@ -153,27 +153,3 @@ function addUserToDB(username, password){
         });
     }) 
 }
-
-
-/*MongoClient.connect(MongoDBUrl, function(err,res){
-    res.collection(userCollection).deleteMany({"username": /ellen/}, function(err, resu) {
-        console.log(resu.deletedCount);
-        res.close()
-    })
-})*/
-
-/*verifyUser("ellen1", "test")
-.then(data => {
-    console.log("ok")
-})
-.catch(err => {
-    console.log("not ok")
-});*/
-
-//for testing
-/*addUserToDB("admin2", "admin").then(data => {
-    console.log(data);
-    getUserFromDB("admin2").then(data => {
-        console.log(data);
-    })
-})*/
