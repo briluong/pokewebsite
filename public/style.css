@@ -46,27 +46,12 @@ li.nav-item:active {
     background: white;
     border-radius: 10px;
 }
-.status-box ul {
+ul {
     list-style: none;
     margin-left: 0;
     padding-left: 0;
 }
 
-.display-stats ul {
-    list-style: none;
-    margin-left: 0;
-    padding-left: 0;
-}
-#comp-disp-0 ul {
-    list-style: none;
-    margin-left: 0;
-    padding-left: 0;
-}
-#comp-disp-1 ul {
-    list-style: none;
-    margin-left: 0;
-    padding-left: 0;
-}
 
 button:focus {
     background: turquoise;
