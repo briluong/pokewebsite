@@ -18,7 +18,7 @@ router.get('/', function(req, res) {
 
 });
 
-router.get('/:pokemonId', function(req, res) {
+router.get('/pokename/:pokemonId', function(req, res) {
     var username = req.query.username;
     var pokemon = req.params.pokemonId;
     if(pokemon && pokemon !== ""){
@@ -76,11 +76,23 @@ router.get('/:pokemonId', function(req, res) {
 
 });
 
-// router.get('/id/:idNum', function(req, res) {
-//     var pokemon = req.params.ID;
-//     if(pokemon && pokemon !== ""){
-//     }
-// }
+router.get('/random', function(req, res) {
+    console.log("getting a random pokemon");
+    var url = "https://pokeapi.co/api/v2/pokemon/" + getRandomInt(1, 802); // pokemon id are in range (1, 802) 
+    console.log(url);
+    var pokemon = getPokemonFromPokeApi(url);
+    pokemon.then(data => {
+        console.log("retrieved random pokemon: " + data);
+        //var jsonPoke = JSON.parse(data);
+        var pokeName = data.name;
+        console.log(pokeName);
+        res.status(200).send(pokeName);
+    })
+    .catch(err => {
+        res.status(500).send("problem getting random pokemon name");  
+    })
+
+})
 
 //create new pokemon //NEED TO FIND WAY TO GET USERNAME
 router.post('/', function(req, res) {
@@ -364,6 +376,13 @@ function recursivePokeAPISearch(result, pokeName, offset){
 }
 
 
+/* Get a random Pokemon if from range (min, max)
+ */
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
 // function getUser(){
 //     return localStorage.pokeUsername;
 // }

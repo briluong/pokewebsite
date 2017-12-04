@@ -88,40 +88,48 @@ function createPokeCompareView() {
 }
 
 
-/* Get a random Pokemon if from range (min, max)
- */
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-}
 
 
-/* Get Pokemon data by the random id from the API
- */
-function getPokemonById(id, getPokemonName){
-    pokemonName = $.ajax({
-        type: 'GET',
-        url: "https://pokeapi.co/api/v2/pokemon/" + id.toString() + "?username=" + localStorage.username,
-        success: function(pokemonData){
-             getPokemonName(pokemonData);
-        },
-        error: function() {
-            alert('Error occured');
-        }
-    })
-}
+// /* Get Pokemon data by the random id from the API
+//  */
+// function getPokemonById(id, getPokemonName){
+//     pokemonName = $.ajax({
+//         type: 'GET',
+//         url: "https://pokeapi.co/api/v2/pokemon/" + id.toString() + "?username=" + localStorage.username,
+//         success: function(pokemonData){
+//              getPokemonName(pokemonData);
+//         },
+//         error: function() {
+//             alert('Error occured');
+//         }
+//     })
+// }
 
 
 /* Get a random Pokemon name from the API
  */
 function getRandomPokemon(event) {
-    randomPokemonId = getRandomInt(1, 802); // pokemon id are in range (1, 802)
-    pokemon = getPokemonById(randomPokemonId, function(pokemonData){
-        pokemonName = pokemonData.name // get name from pokemon data
-        console.log("found random pokemon " + pokemonName);
-        $("#"+event.data.field).val(pokemonName); // display pokemon name
-    });
+    //
+    $.ajax({
+        type: 'GET',
+        url: "/api/pokemon/random",
+        success: function(pokemonData){
+            pokemonName = pokemonData; // get name from pokemon data
+            console.log("found random pokemon " + pokemonName);
+            $("#"+event.data.field).val(pokemonName); // display pokemon name
+        },
+        error: function() {
+            alert('Error occured');
+        }
+    })
+
+    // randomPokemonId = getRandomInt(1, 802); // pokemon id are in range (1, 802)
+    // //WILL NEED TO BE A GET REQUEST
+    // pokemon = getPokemonById(randomPokemonId, function(pokemonData){
+    //     pokemonName = pokemonData.name // get name from pokemon data
+    //     console.log("found random pokemon " + pokemonName);
+    //     $("#"+event.data.field).val(pokemonName); // display pokemon name
+    // });
 }
 
 
@@ -141,7 +149,7 @@ function displayPokemonStats(input) {
     /* TODO query API and if data is valid, display stats in $(.display-stats) */
     /* checking pokemon pages for that pokemon checking by number of sets*/
     //page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
-    var query = "/api/pokemon/" + pokemon;
+    var query = "/api/pokemon/pokename/" + pokemon;
     //$.ajax({type:'GET', url: page, success: function(result){
     //    recursiveAjaxSearch(result, input, 0, input);
     $.ajax({type:'GET', url: query, success: function(result){
@@ -449,7 +457,7 @@ function submitPokemonCreationForm(){
         var pokemon = getPokeModel();
         $.ajax({
         type: 'POST',
-        url: "/api/pokemon/",
+        url: "/api/pokemon/pokename",
         data: pokemon,
         success: function(data){
              successfulPokemonSubmission(data);
@@ -486,8 +494,8 @@ function getPokeModel(){
                     'attack': $("input[name=attack]").val(),
                     'hp': $("input[name=hp]").val(),
                     'pokeimage': pokeImg,
-                    'status': $('input[name=status]:checked').val()
-                    'user': localStorage.pokeUsername;
+                    'status': $('input[name=status]:checked').val(),
+                    'user': localStorage.pokeUsername
                 }
     return pokemon;
 }
