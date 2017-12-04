@@ -9,12 +9,8 @@ var pokeCollection = "sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION";
 // Routes relative to '/api/pokemon'
 
 router.get('/', function(req, res) {
-    // console.log("bad get request")
-    // res.send("request too large to handle, please request a single pokemon using the following format: /api/pokemon/[pokemon name]");
-
-    console.log("req: " + req);
-    console.log("res: " + res);
-    res.json({message: "nothing to see here either"});
+    console.log("bad get request")
+    res.json({message: "request too large to handle, please request a single pokemon using the following format: /api/pokemon/[pokemon name]"});
 
 });
 
@@ -22,6 +18,7 @@ router.get('/pokename/:pokemonId', function(req, res) {
     var username = req.query.username;
     console.log(req.query);
     var pokemon = req.params.pokemonId;
+    var searchLocal = req.query.search;
     if(pokemon && pokemon !== ""){
         // do the search thing
         var pokesearch = searchLocalPokeDB(pokemon);
@@ -48,6 +45,9 @@ router.get('/pokename/:pokemonId', function(req, res) {
                 console.log("pokemon is private, user  does not match : " + data[index]);
                 console.log(data[index]);
                 res.status(409).send("this pokemon was made private by the user, could not retrieve data");
+            }
+            if(searchLocal == 1){
+                res.status(409).send("you can only access your own creations");
             }
             // check the api db
             console.log("checking pokeapi");
@@ -101,7 +101,7 @@ router.get('/random', function(req, res) {
 router.post('/', function(req, res) {
 	var pokemon = req.body;
 	var pokeName = req.body.pokename;
-	var user = req.body.username;
+	var user = req.body.user;
 	console.log("post request: ") 
     console.log(pokemon);
 	// make sure pokemon with that name doesn't already exist
@@ -161,12 +161,65 @@ router.post('/', function(req, res) {
 
 //pokemonId is the pokemon's name
 router.put('/:pokemonId', function(req, res) {
-    res.json({message: "can't update pokemon yet"});
+    var user = req.query.user;
+    var updatedPokeData = req.body;
+    var pokes = searchLocalPokeDB(req.params.pokemonId);
+    pokes.then(data =>{
+        //double check user
+        var pokemon = data[0];
+        if(pokemon.user !== user){
+            console.log("user <" + user + "> not authorized to edit pokemon <" + pokename + ">");
+            res.status(409).send("unauthorized for edit pokemon in db");    
+        }
+        else{
+            updatePokemonInPokeDB(pokename).then(data => {
+                if(data.length !== 1){
+                    console.log("did not updaate one pokemon properly");
+                    res.status(500).send("an error occured when accessing the db");        
+                }
+                else{
+                    console.log("update successful");
+                    res.status(200).send(data[0]);
+                }                
+            }).catch(err => {
+                console.log("problem with update");
+                res.status(500).send("an error occured when accessing the db");        
+            })
+        }
+    }).catch(err => {
+        console.log("problem finding pokemon in localdb");
+        res.status(500).send("an error occured");    
+    })
+    
 });
 
 //pokemonId is the pokemon's name
 router.delete('/:pokemonId', function(req, res) {
-    res.json({message: "can't delete pokemon yet"});
+    var user = req.query.user;
+    var pokename = req.params.pokemonId;
+    var pokes = searchLocalPokeDB(pokename);
+    pokes.then(data =>{
+        //double check user
+        var pokemon = data[0];
+        if(pokemon.user !== user){
+            console.log("user <" + user + "> not authorized to delete pokemon <" + pokename + ">");
+            res.status(409).send("unauthorized for remove pokemon from db");    
+        }
+        else{
+            deleteFromPokeDB(pokename).then(data => {
+                if(data == "ok"){
+                    console.log("deletion successful");
+                    res.status(200).send("worked")
+                }
+            }).catch(err => {
+                console.log("an error occurred when trying to delete <" + pokename + "> from db");
+                res.status(500).send("an error occured when accessing the db");        
+            })
+        }
+    }).catch(err => {
+        console.log("an error occurred when trying access the db for <" + pokename + ">");
+        res.status(500).send("an error occured");    
+    })
 });
 
 /*retrieves pokemon at url and returns a promise with the pokemon data*/
@@ -222,14 +275,6 @@ function submitNewPokemonToDB(pokemon){
         });
     }) 
 }
-
-
-
-
-
-
-
-
 
 /*ensures there are no overlaps in the db, returns pokemon with pokename*/
 function createPokemonCheck(pokeName, user){
@@ -387,9 +432,109 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
-// function getUser(){
-//     return localStorage.pokeUsername;
-// }
 
+/*delete pokemon with this name from the db*/
+function deleteFromPokeDB(pokeName){
+/*conecting to the database*/
+    console.log("deleting pokemon <" + pokeName+ "> from db");
+    return new Promise((resolve, reject) =>{
+        MongoClient.connect(MongoDBUrl, function(err,res){
+            if(err){
+              console.log(err);
+              reject(err); 
+            } 
+            console.log("connected to pokemon database");
+            db = res
+            // need this to be returned
+            db.collection(pokeCollection).deleteOne({name: pokeName}, function(err, res) {
+                if (err) {
+                    console.log(err);
+                    reject(err);
+                }
+                resolve("ok");
+            });
+            db.close();     
+        });
+    })   
+}
+
+/*delete pokemon with this name from the db*/
+function updatePokemonInPokeDB(pokemon){
+/*conecting to the database*/
+
+    var pokename = pokemon.pokename;
+    console.log("updating pokemon <" + pokename + "> from db");
+    var type = {"slot": 1, "type" : {'name': pokemon.type1}};
+    var types = [type];
+    if(pokemon.type2 !== ""){
+        var type2 = {"slot": 2, "type" : {'name': pokemon.type2}}
+        types.push(type2);
+    }
+    console.log("types: ");
+    console.log(types);
+
+    var stats = [];
+    stats.push({"stat": {"url": "https://pokeapi.co/api/v2/stat/6/", "name": "speed"}, "base_stat": pokemon.speed});
+    stats.push({"stat": {"url": "https://pokeapi.co/api/v2/stat/5/", "name": "special-defense"}, "base_stat": pokemon.spcdefense});
+    stats.push({"stat": {"url": "https://pokeapi.co/api/v2/stat/4/", "name": "special-attack"}, "base_stat": pokemon.spcattack});
+    stats.push({"stat": {"url": "https://pokeapi.co/api/v2/stat/3/", "name": "defense"}, "base_stat": pokemon.defense});
+    stats.push({"stat": {"url": "https://pokeapi.co/api/v2/stat/2/", "name": "attack"}, "base_stat": pokemon.attack});
+    stats.push({"stat": {"url": "https://pokeapi.co/api/v2/stat/1/", "name": "hp"}, "base_stat": pokemon.hp});
+    console.log(stats);
+
+    var sprites = null;
+    if(pokemon.sprites !== null){
+        sprites = {'front_default': pokemon.pokeimage};
+    }
+    console.log(sprites);
+    //var updateQuery = {"height": pokemon.height, "weight": pokemon.weight, "types": types, "stats": stats};
+
+    // if(sprites !== null){
+    //     updateQuery["sprites"] = sprites;
+    // // }
+    // console.log(updateQuery);
+    return new Promise((resolve, reject) =>{
+        MongoClient.connect(MongoDBUrl, function(err,res){
+            if(err){
+              console.log(err);
+              reject(err); 
+            } 
+            console.log("connected to pokemon database");
+            db = res
+            // need this to be returned
+            //cut this out later
+            db.collection(pokeCollection).find({name: pokename}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
+                        console.log(results);
+            })
+
+            db.collection(pokeCollection).update({name: pokename}, {$set: {"height": pokemon.height, "weight": pokemon.weight, "types": types, "stats": stats, "status": pokemon.status}}, function(err, results) {
+                if(err){
+                    console.log(err);
+                    reject(err);
+                    db.close();
+                    return;  
+                }
+                if(sprites !== null){
+                    db.collection(pokeCollection).update({name: pokename}, {$set: {"sprites": sprites}}, function(err, results) {
+                        if(err){
+                            console.log(err);
+                            reject(err);  
+                        }
+                        console.log("successfully updated sprites");
+                        db.close();
+                        return;
+                    }) 
+                }
+                console.log("successfully modified");
+                db.collection(pokeCollection).find({name: pokename}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
+                    console.log(results);
+                    resolve(results);
+                    db.close();
+                    return;
+                })
+            });
+        });
+    })   
+}
 
 module.exports = router;

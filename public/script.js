@@ -111,10 +111,10 @@ var dl_load = false;
 var rl_load = false;
 var load_complete = dl_load && dr_load;
 /*displays pokemon stats of pokemon*/
-function displayPokemonStats(input) {
+function displayPokemonStats(input, localPoke) {
 
     var pokemon = $(input).val().toLowerCase().replace(/ /g, "-");
-    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername;
+    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername + "&search=" + localPoke;
     $.ajax({type:'GET', url: query, success: function(result){
         if (input == "#single-input") {
             $(".display-stats").empty();
@@ -190,7 +190,7 @@ function couldNotAccessAPIError(request, status, error) {
 
 /*display stats of a single pokemon*/
 function singlePokemon(){
-    displayPokemonStats(input="#single-input");
+    displayPokemonStats(input="#single-input", 0);
 }
 
 /*display stats of two pokemon*/
@@ -200,8 +200,8 @@ function doublePokemon(input_field){
     $("#comp-disp-0").html("");
     $("#comp-disp-1").html("");
     if ($("#input-0").val()!=$("#input-1").val()){
-        displayPokemonStats(input="#input-0");  
-        displayPokemonStats(input="#input-1");
+        displayPokemonStats(input="#input-0", 0);  
+        displayPokemonStats(input="#input-1", 0);
     } else {
         alert('Please insert two different pokemons.');
     }
@@ -537,15 +537,6 @@ function attributePP(string) {
     return newstr.charAt(0).toUpperCase() + newstr.slice(1);
 }
 
-
-
-
-
-
-
-
-
-
 /* Create all elements required for the manage Pokemon edit and delete view.
  */
 function createManagePokeView() {
@@ -674,14 +665,14 @@ function activeEditForm(){
                                 $('<input/>', {'type': 'radio', 'name': 'status', 'value': "private", 'text': 'private'}), "private"))
             )
         ),
-        $('<button/>', {'class': 'submit-button', 'id': 'confirm-edit-button', text: "Confirm Edit"}).on("click", renewPokemon) 
+        $('<button/>', {'class': 'submit-button', 'id': 'confirm-edit-button', text: "Confirm Edit"}) 
     )
 }
 
 
 /* delete pokemon */
 function deleteSinglePokemon(){
-    displayPokemonStats(input="#single-input-delete");    
+    displayPokemonStats(input="#single-input-delete", 1);    
     $('#delete-text-curr').show()
     $(".confirm-delete-button").show()
     $('#delete-confirm-text').hide()
@@ -702,21 +693,22 @@ function deletePokemon(){
 /*TO BE FIXED error stuff*/
 function deleteFromDB(pokeName){
     var pokemon = {'pokename': pokeName};
+    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername;
     $.ajax({
     type: 'DELETE',
-    url: "http://localhost:8080/api/pokemon/",
+    url: query,
     data: pokemon,
     success: function(data){
          successfulPokemonDeletion(data);
     },
     error: function(xhr) {
         if(xhr.status == 409){
-        console.log("pokemon found in db or pokeapi");
-            alert("this name is already in use, please pick another");
+        console.log("cannot delete this pokemon");
+            alert("unauthorized to delete this pokemon?");
         }
         else{
         console.log(xhr.status + " error has occured");
-            alert("");         
+            alert("could not delete pokemon, error occured");         
         }
     }
     })
@@ -724,7 +716,7 @@ function deleteFromDB(pokeName){
 
 
 function editSinglePokemon(){
-    displayPokemonStats(input="#single-input-edit");        
+    displayPokemonStats(input="#single-input-edit", 1);        
     $('#edit-text-curr').show();
     $('#edit-text-editted').hide();
     $(".edit-pokemon-col").show();
@@ -752,21 +744,22 @@ function renewPokemon(){
 function submitPokemonUpdateForm(pokename){
     if(isValidPokemonCreationForm()){
         var pokemon = getPokeModel();
+        var query = "/api/pokemon/pokename/" + pokename + "?username=" + localStorage.pokeUsername;
         $.ajax({
         type: 'PUT',
-        url: "/api/pokemon/pokename/" + pokename,
+        url: query,
         data: pokemon,
         success: function(data){
              successfulPokemonUpdate(data);
         },
         error: function(xhr) {
             if(xhr.status == 409){
-            console.log("pokemon found in db or pokeapi");
-                alert("this name is already in use, please pick another");
+            console.log("could not update pokemon in db");
+                alert("unauthorized to edit this pokemon");
             }
             else{
             console.log(xhr.status + " error has occured");
-                alert("An error has occurred, please try again later");         
+                alert("could not update pokemon, error has occured");         
             }
         }
         })
@@ -808,7 +801,7 @@ function updateToDB(){
 
 
 function showUpdatePokemon(){
-    displayPokemonStats(input="#single-input-edit");
+    displayPokemonStats(input="#single-input-edit", 1);
     $('#edit-text-editted').show();
 }
 
