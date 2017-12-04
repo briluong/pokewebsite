@@ -2,7 +2,6 @@
 var MongoDBUrl = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db";
 var pokeCollection = "sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION";
 
-
 /* Create side navigation bar and main content box
  */
 function createViewOutline() {
@@ -13,19 +12,28 @@ function createViewOutline() {
             $('<div/>', {'class': 'col-sm-3 nav-box', text:"Navigation"}),
             $('<div/>', {'class': 'col-sm-9 inner-content', 'align': 'center'})
         )
-    );
+    )
     $(".nav-box").append(
         $('<ul/>', {'class': 'nav'}).append(
             $('<li/>', {'class': 'nav-item', 'id': 'single-poke', text: "Single Pokemon data"}),
             $('<li/>', {'class': 'nav-item', 'id': 'compare-poke', text: "Pokemon comparison"}),
             $('<li/>', {'class': 'nav-item', 'id': 'edit-delete-poke', text: "Manage Pokemons"}),
-            $('<li/>', {'class': 'nav-item', 'id': 'log-out', text: "Log Out"})
+            $('<li/>', {'class': 'nav-item', 'id': 'create-poke', text: "Create a Pokemon"}),
+            $('<li/>', {'class': 'nav-item', 'id': 'logout', text: "Logout"})
         )
     )
     $("#single-poke").on("click", createSinglePokeView);
     $("#compare-poke").on("click", createPokeCompareView);
     $("#edit-delete-poke").on("click", createManagePokeView);
-    $("#log-out").on("click", userLogOut);
+    $("#create-poke").on("click", createCreatePokeView);
+    $("#logout").on("click", logOut);
+}
+
+/* Return to welcome page */
+function logOut() {
+    // unset username
+    localStorage.removeItem("pokeUsername");
+    window.location = "/index.html";
 }
 
 
@@ -37,12 +45,15 @@ function createSinglePokeView() {
     $(".inner-content").html("");
     $(".inner-content").append(
         $('<div/>', {'class': 'input-bar'}).append(
-            $('<button/>', {'class': 'random-button', text: "Random"}).on("click", {field: "single-input"}, getRandomPokemon),
+            $('<button/>', {'class': 'random-button', text: "Random"}),
             $('<input/>', {'type': 'text', 'id': 'single-input', 'placeholder': "Input Pokemon", 'maxlength': "11", 'size': "15"}),
-            $('<button/>', {'class': 'submit-button', 'id': 'single-submit', text: "Submit"}).on("click", singlePokemon)
+            $('<button/>', {'class': 'submit-button', 'id': 'single-submit', text: "Submit"})
         ),
         $('<div/>', {'class': 'display-stats'})
     );
+
+    $(".random-button").on("click", {field: "single-input"}, getRandomPokemon);
+    $("#single-submit").on("click", singlePokemon);
 }
 
 
@@ -72,160 +83,103 @@ function createPokeCompareView() {
         )
     })
     $(".between-cols").append(
-        $('<button/>', {'class': 'submit-button', text: "Submit"}).on("click", doublePokemon)
+        $('<button/>', {'class': 'submit-button compare-submit', text: "Submit"})
     )
+    
+    $(".compare-submit").on("click", doublePokemon);
 }
-
-
-/* Get a random Pokemon if from range (min, max)
- */
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-}
-
-
-/* Get Pokemon data by the random id from the API
- */
-function getPokemonById(id, getPokemonName){
-    pokemonName = $.ajax({
-        type: 'GET',
-        url: "https://pokeapi.co/api/v2/pokemon/" + id.toString() + "/",
-        success: function(pokemonData){
-             getPokemonName(pokemonData);
-        },
-        error: function() {
-            alert('Error occured: rejected by API.');
-        }
-    })
-}
-
 
 /* Get a random Pokemon name from the API
  */
 function getRandomPokemon(event) {
-    randomPokemonId = getRandomInt(1, 802); // pokemon id are in ragne (1, 802)
-    pokemon = getPokemonById(randomPokemonId, function(pokemonData){
-        pokemonName = pokemonData.name // get name from pokemon data
-        console.log("found random pokemon " + pokemonName);
-        $("#"+event.data.field).val(pokemonName); // display pokemon name
-        });
-    }
-
-
-/* Check that input is valid by querying API and display Pokemon stats
- */
-
-function displayPokemonStats(input) {
-    pokemon = $(input).val().toLowerCase().replace(/ /g, "-");
-    /* TODO query API and if data is valid, display stats in $(.display-stats) */
-    /* checking pokemon pages for that pokemon checking by number of sets*/
-    page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
-    $.ajax({type:'GET', url: page, success: function(result){
-        recursiveAjaxSearch(result, pokemon, 0, input);
-    },
-    error: function(request, status, error){
-        alert('Error occured: rejected by API.');
-    }
+    //
+    $.ajax({
+        type: 'GET',
+        url: "/api/pokemon/random",
+        success: function(pokemonData){
+            pokemonName = pokemonData; // get name from pokemon data
+            console.log("found random pokemon " + pokemonName);
+            $("#"+event.data.field).val(pokemonName); // display pokemon name
+        },
+        error: function() {
+            alert('Error occured');
+        }
     })
 }
-
 
 var dl_load = false;
 var rl_load = false;
 var load_complete = dl_load && dr_load;
-var offset0 = 0;
-var offset1 = 0;
+/*displays pokemon stats of pokemon*/
+function displayPokemonStats(input) {
 
-/*recursively handling ajax request for pokemon searches*/
-function recursiveAjaxSearch(result, pokemon, offset, input){
-    var pokeFound = false;
-    pokemon = $(input).val();
-    if (pokemon == ""){
-        alert('Some of your input is blank, please insert pokemon.');
-        return;
-    } else {
-        for(let pkmon of result.results){
-            if(pkmon.name == pokemon){
-                pokeFound = true;
-                console.log("looking up " + pokemon);
-                $.ajax({type:'GET', url: pkmon.url, success: function(result){
-                    if (input == "#single-input") {
-                        $(".display-stats").empty();
-                        display_field = $(".display-stats");
-                        i = 0;
-                        }
-                    else if (input == "#single-input-delete") {
-                        $(".display-stats-delete").empty();
-                        display_field = $(".display-stats-delete");
-                        i = 3;
-                        }
-                    else if (input == "#single-input-edit") {
-                        $(".display-stats-edit").empty();
-                        display_field = $(".display-stats-edit");
-                        i = 4;
-                        }
-                    else if (input == "#input-0") {
-                        // clear current field
-                        if (offset == 0){offset0 = 0};
-                        console.log("OFFSET0: ", offset0);
-                        $("#comp-disp-0").empty();
-                        display_field = $("#comp-disp-0");
-                        dl_load = true;
-                        load_complete = dl_load && dr_load;
-                        console.log("Complete after load pokemon1:"+load_complete);
-                        i = 1; 
-                    }
-                    else if (input == "#input-1") {
-                        if (offset == 0){offset1 = 0};
-                        console.log("OFFSET1: ", offset1);
-                        $("#comp-disp-1").empty();
-                        display_field = $("#comp-disp-1");
-                        dr_load = true;
-                        load_complete = dl_load && dr_load;
-                        console.log("Complete after load pokemon2:"+load_complete);
-                        i = 2;
-                    }
-                    renderPokemonStats(result, display_field, i.toString());
-                    handle_load(load_complete);
-                    return;
-                },
-                error: function(request, status, error){
-                    couldNotAccessAPIError(request, status, error)
-                }
-                })
-            }
+    var pokemon = $(input).val().toLowerCase().replace(/ /g, "-");
+    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername;
+    $.ajax({type:'GET', url: query, success: function(result){
+        if (input == "#single-input") {
+            $(".display-stats").empty();
+            display_field = $(".display-stats");
+            i = 0;
         }
-        if (((input != "#input-0" || "#input-1") && (!pokeFound) && (offset < 950)) ||
-            (input == "#input-0" && (!pokeFound) && offset0 < 950) || 
-            (input == "#input-1" && (!pokeFound) && offset1 < 950)) {
-            if (input != "#input-0" || "#input-1") {pkOffset = offset + 50}
-            else if (input == "#input-0") {pkOffset = offset0 + 50; offset0 = offset0 + 50}
-            else if (input == "#input-1") {pkOffset = offset1 + 50; offset1 = offset1 + 50}
-            
-            page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=" + pkOffset;
-            $.ajax({type:'GET', url: page, success: function(result){
-                recursiveAjaxSearch(result, pokemon, pkOffset, input)
-            }, error: function(request, status, error){
-                couldNotAccessAPIError(request, status, error)
+        else if (input == "#input-0") {
+            // clear current field
+            $("#comp-disp-0").html("");
+            display_field = $("#comp-disp-0");
+            dl_load = true;
+            load_complete = dl_load && dr_load;
+            console.log("Complete after load pokemon1:"+load_complete);
+            i = 1;
+        }
+        else if (input == "#input-1") {
+            $("#comp-disp-1").html("");
+            display_field = $("#comp-disp-1");
+            dr_load = true;
+            load_complete = dl_load && dr_load;
+            console.log("Complete after load pokemon2:"+load_complete);
+            i = 2;
+        }
+        else if (input == "#single-input-delete") {
+            $(".display-stats-delete").empty();
+            display_field = $(".display-stats-delete");
+            i = 3;
+        }
+        else if (input == "#single-input-edit") {
+            $(".display-stats-edit").empty();
+            display_field = $(".display-stats-edit");
+            i = 4;
+        }
+        renderPokemonStats(result, display_field, i.toString())
+        handle_load(load_complete);
+        return;
+    },
+    error: function(request, status, error){
+        console.log(error);
+
+        if(error == "Conflict"){
+            if(input == "#single-input-delete" || input == "#single-input-edit"){
+                alert("this pokemon was not made using this account, only pokemon made by this account can be managed")
             }
-            })
-        } else if (((input != "#input-0" || "#input-1") && (!pokeFound) && (offset >= 950)) ||
-                   (input == "#input-0" && (!pokeFound) && offset0 >= 950) || 
-                   (input == "#input-1" && (!pokeFound) && offset1 >= 950)) {
-                alert("could not find pokemon <" + pokemon + "> please try another");
+            else{
+                alert("this pokemon was made private by the user, could not retrieve data");
+   
+            }        }
+        else if(error == "Bad Request"){
+            alert("this pokemon does not exist, please try another");
+        }
+        else{
+            alert("could not connect to database, please try again later");
         }
     }
+    })
 }
 
 
 /*initiates pokemon comparision once data has loaded */
 function handle_load(l_c){
-    if (load_complete == true){
+    if (load_complete){
+        console.log("load stats complete"); 
         comparePokemon("#comp-disp-0", "#comp-disp-1");
-    };
-}
+    };}
 
 
 /*alert user if the there was an issue accessing the API*/
@@ -240,15 +194,12 @@ function singlePokemon(){
 }
 
 /*display stats of two pokemon*/
-function doublePokemon(){
+function doublePokemon(input_field){
     dl_load = false;
     dr_load = false;
-    load_complete = false;
     $("#comp-disp-0").html("");
     $("#comp-disp-1").html("");
     if ($("#input-0").val()!=$("#input-1").val()){
-        offset0 = 0;
-        offset1 = 0;
         displayPokemonStats(input="#input-0");  
         displayPokemonStats(input="#input-1");
     } else {
@@ -261,7 +212,7 @@ function doublePokemon(){
 /* Retrieve two Pokemons' data from the API and compare their stats
  */
 function comparePokemon(p1, p2) {
-    /* Query API and if both names are valid, 
+    /* TODO query API and if both names are valid, 
      *      display pokemon1's stats in $("#comp-disp-0") 
      *      display pokemon2's stats in $("#comp-disp-1") 
      */
@@ -301,9 +252,7 @@ function comparePokemon(p1, p2) {
     hp2 = parseInt($("#hp2 > td").text());
     dict[5] = new Array(hp1, hp2, $("#hp1"), $("#hp2"));
     
-    dictl = dict.length
-    
-    for (var i = 0; i < dictl; i++) {
+    for (var i = 0; i < dict.length; i++) {
         if (dict[i][0] < dict[i][1]) {
             dict[i][3].css("background-color", "turquoise");
         } 
@@ -332,7 +281,7 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
     /*display the stats*/
     display_field
     .append($('<figure/>')
-        .append($('<img/>', {'src': pokemonInfo.sprites.front_default}))
+        .append($('<img/>', {'src': pokemonInfo.sprites.front_default, 'height': 96, 'width': 96}))
         .append($('<figcaption/>').html("Front"))
     )
     if (pokemonInfo.sprites.back_default){
@@ -352,25 +301,25 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
             .append($('<figcaption/>').html("Female back")))
     }
 
-    display_field.append(
-    $('<table/>', {'id':'stats'+i})
-        .append($('<tr/>')
+    display_field
+    .append($('<table/>', {'id':'stats'+i})
+        .append($('<tr/>', {'id': 'name'+i})
             .append($('<th/>').html("Name:"))
-            .append($('<td/>', {'id': 'name'+i}).html(attributePP(pokemonInfo.name)))
+            .append($('<td/>').html(attributePP(pokemonInfo.name)))
         )
-        .append($('<tr/>')
+        .append($('<tr/>', {'id': 'height'+i})
             .append($('<th/>').html("Height:"))
-            .append($('<td/>', {'id': 'height'+i}).html(pokemonInfo.height))
+            .append($('<td/>').html(pokemonInfo.height))
         )
-        .append($('<tr/>')
+        .append($('<tr/>', {'id': 'weight'+i})
             .append($('<th/>').html("Weight:"))
-            .append($('<td/>', {'id': 'weight'+i}).html(pokemonInfo.weight))
+            .append($('<td/>').html(pokemonInfo.weight))
         )
-        .append($('<tr/>')
+        .append($('<tr/>', {'id': 'poketypes'+i})
             .append($('<th/>').html("Types: "))
             .append($('<td/>')
                 .append($('<ul/>', {'id':'poketypes'+i})
-                        .append(pokemonInfo.types.map(ptype => $("<li>", {'id': 'types'+i}).text(attributePP(ptype.type.name))))
+                    .append(pokemonInfo.types.map(ptype => $("<li>").text(attributePP(ptype.type.name))))
                 )
             )
         )
@@ -379,12 +328,207 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
         )
         .append(pokemonInfo.stats.map(pstat => $("<tr/>", {'class': 'pokestat', 'id': pstat.stat.name.toString()+i})
             .append($('<th/>').html(attributePP(pstat.stat.name)))
-            .append($('<td/>', {'id': pstat.stat.name}).html(pstat.base_stat))
-            )
+            .append($('<td/>').html(pstat.base_stat))
+            )   
         )
     )
     if (i == 4) {activeEditForm()};
+
 }
+
+
+
+/* Create Create Pokemon view
+ */
+function createCreatePokeView() {
+    console.log("Creating create pokemon view");
+
+    $(".inner-content").html("");
+    $(".inner-content").append(
+        $('<div/>', {'class': 'create-poke-image'}).append(
+            $('<img/>', {'id': 'create-poke-pic', 'height': 96, 'width': 96}),
+            $('<button/>', {'id': 'preview-button', 'text': "Preview"})
+        ),
+        $('<form/>', {'name': 'create-poke-name-submission-page', 'id': 'create-poke-form', "onsubmit":"return submitPokemonCreationForm()"}).append(
+            $('<input/>', {'type': 'text', 'name': 'pokeimage', 'placeholder': "image url", 'size': "15"}),
+            $('<table/>', {'id':'stats'}).append(
+                $('<tr/>', {'id': 'name'}).append(
+                    $('<th/>').html("Name:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'pokename', 'placeholder': "Pokemon Name", 'maxlength': "11", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'height'}).append(
+                    $('<th/>').html("Height:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'height', 'placeholder': "height in cm", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'weight'}).append(
+                    $('<th/>').html("Weight:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'weight', 'placeholder': "weight in kg", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'types'}).append(
+                    $('<th/>').html("Types:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'type1', 'placeholder': "normal", 'size': "15"}),
+                        $('<input/>', {'type': 'text', 'name': 'type2', 'placeholder': "type2, optional", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'base-stats'}).append(
+                    $('<th/>', {'colspan' : 2}).html("Base Stats: ")
+                ),
+                $('<tr/>', {'id': 'speed'}).append(
+                    $('<th/>').html("Speed:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'speed', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'special-defense'}).append(
+                    $('<th/>').html("Special-defense:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'spcdefense', 'placeholder': "1",'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'special-attack'}).append(
+                    $('<th/>').html("Special attack:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'spcattack', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'defense'}).append(
+                    $('<th/>').html("Defense:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'defense', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'attack'}).append(
+                    $('<th/>').html("Attack:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text', 'name': 'attack', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'hp'}).append(
+                    $('<th/>').html("Hp:"),
+                    $('<td/>').append(
+                        $('<input/>', {'type': 'text','name': 'hp', 'placeholder': "1", 'size': "15"})
+                    )
+                ),
+                $('<tr/>', {'id': 'private-status'}).append(
+                    $('<th/>', {'colspan' : 2}).append(
+                        $('<input/>', {'type': 'radio', 'name': 'status', 'value': "public", 'checked': "checked"}),
+                        "public",
+                        $('<br/>'),
+                        $('<input/>', {'type': 'radio', 'name': 'status', 'value': "private", 'text': 'private'}),
+                        "private"
+                    )
+                )
+            ),
+            $('<button/>', {'class': 'submit-button', 'id': 'create-poke-name-submit', 'text':"Submit"})
+       ) 
+    );
+
+    $("#preview-button").on("click", previewImage);
+}
+/**/
+function submitPokemonCreationForm(){
+    if(isValidPokemonCreationForm()){
+        var pokemon = getPokeModel();
+        $.ajax({
+        type: 'POST',
+        url: "/api/pokemon/",
+        data: pokemon,
+        success: function(data){
+             successfulPokemonSubmission(data);
+        },
+        error: function(xhr) {
+            if(xhr.status == 409){
+            console.log("pokemon found in db or pokeapi");
+                alert("this name is already in use, please pick another");
+            }
+            else{
+            console.log(xhr.status + " error has occured");
+                alert("An error has occurred, please try again later");         
+            }
+        }
+        })
+    }
+    return false;
+}
+
+function getPokeModel(){
+    var pokeImg = $("input[name=pokeimage]").val();
+    if(pokeImg==""){
+        pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
+    }
+    var pokemon = {'pokename': $("input[name=pokename]").val(),
+                    'height': $("input[name=height]").val(),
+                    'weight': $("input[name=weight]").val(),
+                    'type1': $("input[name=type1]").val(),
+                    'type2': $("input[name=type2]").val(),
+                    'speed': $("input[name=speed]").val(),
+                    'spcdefense': $("input[name=spcdefense]").val(),
+                    'spcattack': $("input[name=spcattack]").val(),
+                    'defense': $("input[name=defense]").val(),
+                    'attack': $("input[name=attack]").val(),
+                    'hp': $("input[name=hp]").val(),
+                    'pokeimage': pokeImg,
+                    'status': $('input[name=status]:checked').val(),
+                    'user': localStorage.pokeUsername
+                }
+    return pokemon;
+}
+
+
+/*validates the pokemon creation page */
+function isValidPokemonCreationForm(){
+    console.log("validating pokemon creation form")
+    var formFilled= true;
+    $("#create-poke-form input[type=text]").each(function(){
+        console.log($(this).val())
+        if($(this).val()==""){
+            console.log($(this).attr("id"))
+            if($(this).attr("name")!=="type2" && $(this).attr("name")!=="pokeimage"){
+                formFilled= false;
+                return false;
+            }
+        }
+    });
+    if(!formFilled){
+    alert("page is missing input, please fill in all the fields provided");
+    }
+    return formFilled;
+}
+
+function previewImage() {
+    console.log("preview image");
+    url = $("input[name=pokeimage]").val();
+    console.log(url);
+    if(url==""){
+        url = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
+    }
+    $('#create-poke-pic').attr('src', url);
+    return;
+}
+
+
+
+
+function successfulPokemonSubmission(pokemon){
+    $(".inner-content").html("");
+    $(".inner-content").append(
+        $('<div/>', {'class': 'display-stats'}).append(
+            $('<p/>').html("Pokemon successfully added to the database!"),
+            $('<button/>', {'id': 'create-another', text: "Create Another!"})
+        )
+    );
+    renderPokemonStats(pokemon, $(".inner-content"), "1");
+    $("#create-another").on("click", createCreatePokeView);
+    return;
+}
+
 
 
 /* Pretty print an attribute by replacing dashes with spaces and capitalizing the first letter */
@@ -392,6 +536,14 @@ function attributePP(string) {
     var newstr = string.replace(/-/g, " ");
     return newstr.charAt(0).toUpperCase() + newstr.slice(1);
 }
+
+
+
+
+
+
+
+
 
 
 /* Create all elements required for the manage Pokemon edit and delete view.
@@ -411,12 +563,12 @@ function createManagePokeView() {
                     .append($('<th/>').html("Delete").css("background-color", "#baefec"))
                     .append($('<table/>'), {'id': 'history-sub-table'})
         ),
-        loadHistory(),
+        //loadHistory(),
             
         $('<div/>', {'class': 'delete-container'}).append(
             $('<sub-heading/>', {'class': 'sub-head', text: "Delete Pokemon"}),
             $('<div/>', {'class': 'input-bar'}).append(
-                $('<button/>', {'class': 'random-button-delete', text: "Random"}).on("click", {field: "single-input-delete"}, getRandomPokemon),
+                //$('<button/>', {'class': 'random-button-delete', text: "Random"}).on("click", {field: "single-input-delete"}, getRandomPokemon),
                 $('<input/>', {'type': 'text', 'id': 'single-input-delete', 'placeholder': "Input Pokemon", 'maxlength': "11", 'size': "15"}),
                 $('<button/>', {'class': 'submit-button-delete', 'id': 'single-submit-delete', text: "Submit"}).on("click", deleteSinglePokemon)
             ),
@@ -429,9 +581,9 @@ function createManagePokeView() {
         ),
             
         $('<div/>', {'class': 'edit-container'}).append(
-            $('<sub-heading/>', {'class': 'sub-head', text: "Edit Pokemon"}).on("click", {field: "single-input-delete"}, getRandomPokemon),
+            $('<sub-heading/>', {'class': 'sub-head', text: "Edit Pokemon"}),
             $('<div/>', {'class': 'input-bar'}).append(
-                $('<button/>', {'class': 'random-button-edit', text: "Random"}).on("click", {field: "single-input-edit"}, getRandomPokemon),
+            //    $('<button/>', {'class': 'random-button-edit', text: "Random"}).on("click", {field: "single-input-edit"}, getRandomPokemon),
                 $('<input/>', {'type': 'text', 'id': 'single-input-edit', 'placeholder': "Input Pokemon", 'maxlength': "11", 'size': "15"}),
                 $('<button/>', {'class': 'submit-button-edit', 'id': 'single-submit-edit', text: "Submit"}).on("click", editSinglePokemon)
             ), 
@@ -547,7 +699,7 @@ function deletePokemon(){
     $('#delete-confirm-text').show();
 }
 
-
+/*TO BE FIXED error stuff*/
 function deleteFromDB(pokeName){
     var pokemon = {'pokename': pokeName};
     $.ajax({
@@ -555,7 +707,7 @@ function deleteFromDB(pokeName){
     url: "http://localhost:8080/api/pokemon/",
     data: pokemon,
     success: function(data){
-         successfulPokemonSubmission(data);
+         successfulPokemonDeletion(data);
     },
     error: function(xhr) {
         if(xhr.status == 409){
@@ -564,7 +716,7 @@ function deleteFromDB(pokeName){
         }
         else{
         console.log(xhr.status + " error has occured");
-            alert("An error has occurred, please try again later");         
+            alert("");         
         }
     }
     })
@@ -596,12 +748,62 @@ function renewPokemon(){
     $('#edit-confirm-text').show();
 }
 
+/*FINISH THIS error stuff*/
+function submitPokemonUpdateForm(pokename){
+    if(isValidPokemonCreationForm()){
+        var pokemon = getPokeModel();
+        $.ajax({
+        type: 'PUT',
+        url: "/api/pokemon/pokename/" + pokename,
+        data: pokemon,
+        success: function(data){
+             successfulPokemonUpdate(data);
+        },
+        error: function(xhr) {
+            if(xhr.status == 409){
+            console.log("pokemon found in db or pokeapi");
+                alert("this name is already in use, please pick another");
+            }
+            else{
+            console.log(xhr.status + " error has occured");
+                alert("An error has occurred, please try again later");         
+            }
+        }
+        })
+    }
+    return false;
+}
+
+function successfulPokemonUpdate(pokemon){
+    $(".inner-content").html("");
+    $(".inner-content").append(
+        $('<div/>', {'class': 'display-stats'}).append(
+            $('<p/>').html("Pokemon successfully updated in database!"),
+            $('<button/>', {'id': 'manage-pokemon', text: "Manage pokemon"})
+        )
+    );
+    renderPokemonStats(pokemon, $(".inner-content"), "1");
+    $("#manage-pokemon").on("click", createManagePokeView);
+    return;
+}
+
+function successfulPokemonDeletion(pokemon){
+    $(".inner-content").html("");
+    $(".inner-content").append(
+        $('<div/>', {'class': 'display-stats'}).append(
+            $('<p/>').html("Pokemon successfully deleted from the database!"),
+            $('<button/>', {'id': 'manage-pokemon', text: "Manage pokemon"})
+        )
+    );
+    renderPokemonStats(pokemon, $(".inner-content"), "1");
+    $("#manage-pokemon").on("click", createManagePokeView);
+    return;
+}
+
 
 function updateToDB(){
     pokename = $('#name4').text();
-    
-    submitPokemonCreationForm();
-    deleteFromDB(pokename);
+    submitPokemonUpdateForm(pokename);
 }
 
 
@@ -610,7 +812,7 @@ function showUpdatePokemon(){
     $('#edit-text-editted').show();
 }
 
-
+/*FIX THIS*/
 function loadHistory(){
     console.log("looking up user history")
     var userHistory;
@@ -660,215 +862,13 @@ function loadHistory(){
 }
 
 
-function recursivePokeDBSearch(){
-    //TODO
-}
-
-
-//// //// log-in-out possible helper
-function userLogOut(){
-    console.log("logging out");
-    if (typeof(window.Storage) !== "undefined") {
-        // Remove.
-        localStorage.removeItem("email");
-        localStorage.removeItem("lastname");
-        localStorage.removeItem("user");
-    } else {
-        console.log("Error: No web storage support.");
-    }
-    // Log out.
-}
-
-
-function userLogIn(){
-    console.log("logging in"); ////
-    if (typeof(window.Storage) !== "undefined") {
-        // Store.
-        window.localStorage.setItem("email", "1111@mail.com");
-        window.localStorage.setItem("password", "user1111");
-        window.localStorage.setItem("user", "catgod"); ////
-        // var userEmail = window.localStorage.getItem("email");
-        // var userPassword= window.localStorage.getItem("password");
-        // localStorage.removeItem("name");
-        // localStorage.removeItem("lastname");
-    } else {
-        console.log("Error: No web storage support.");
-    } ////   
-    // Log in.
-}
-//// ////
 
 
 
 
-function submitPokemonCreationForm(){
-    if(isValidPokemonCreationForm()){
-        var pokemon = getPokeModel();
-        $.ajax({
-        type: 'POST',
-        url: "http://localhost:8080/api/pokemon/",
-        data: pokemon,
-        success: function(data){
-             successfulPokemonSubmission(data);
-        },
-        error: function(xhr) {
-            if(xhr.status == 409){
-            console.log("pokemon found in db or pokeapi");
-                alert("this name is already in use, please pick another");
-            }
-            else{
-            console.log(xhr.status + " error has occured");
-                alert("An error has occurred, please try again later");         
-            }
-        }
-        })
-    }
-    return false;
-}
-
-function getPokeModel(){
-    var pokeImg = $("input[name=pokeimage]").val();
-    if(pokeImg==""){
-        pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
-    }
-    var pokemon = {'pokename': $("input[name=pokename]").val(),
-                    'height': $("input[name=height]").val(),
-                    'weight': $("input[name=weight]").val(),
-                    'type1': $("input[name=type1]").val(),
-                    'type2': $("input[name=type2]").val(),
-                    'speed': $("input[name=speed]").val(),
-                    'spcdefense': $("input[name=spcdefense]").val(),
-                    'spcattack': $("input[name=spcattack]").val(),
-                    'defense': $("input[name=defense]").val(),
-                    'attack': $("input[name=attack]").val(),
-                    'hp': $("input[name=hp]").val(),
-                    'pokeimage': pokeImg,
-                    'status': $('input[name=status]:checked').val()
-                }
-    return pokemon;
-}
-
-
-/*validates the pokemon creation page */
-function isValidPokemonCreationForm(){
-    console.log("validating pokemon creation form")
-    var formFilled= true;
-    $("#create-poke-form input[type=text]").each(function(){
-        console.log($(this).val())
-        if($(this).val()==""){
-            console.log($(this).attr("id"))
-            if($(this).attr("name")!=="type2" && $(this).attr("name")!=="pokeimage"){
-                formFilled= false;
-                return false;
-            }
-        }
-    });
-    if(!formFilled){
-    alert("page is missing input, please fill in all the fields provided");
-    }
-    return formFilled;
-}
-
-function previewImage() {
-    console.log("preview image");
-    url = $("input[name=pokeimage]").val();
-    console.log(url);
-    if(url==""){
-        url = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
-    }
-    $('#create-poke-pic').attr('src', url);
-    return;
-}
 
 
 
-//// ////
-
-/* gets you all of the pokemon with pokename in the local db*/
-function searchLocalPokeDB(pokeName){
-    /*conecting to the database*/
-    return new Promise((resolve, reject) =>{
-        MongoClient.connect(MongoDBUrl, function(err,res){
-            if(err){
-              console.log(err);
-              reject(err); 
-            } 
-            console.log("Database created");
-            db = res
-            // need this to be returned
-            db.collection(pokeCollection).find({name: pokeName}, { _id:0, name:1, height:1, weight:1, types:1, speed:1, special_defense:1, special_attack:1, defense:1, attack:1, hp:1, sprites:1, user:1, status:1}).toArray(function(err, results){
-                resolve(results);
-                db.close();
-            })     
-        });
-    }) 
-}
-
-
-/*searches the orig pokeapi for pokemon with name pokeName and returns a promise with url if exists or null if it doesn't*/
-function searchOrigPokemon(pokeName){
-    console.log("searching pokeapi");
-    if (pokeName == ""){
-        console.log("input was blank");
-        return;
-    } 
-    pokemonInfoURL = new Promise((resolve, reject) => {
-    
-        /* checking pokemon pages for that pokemon checking by number of sets*/
-        page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
-        $.ajax({type:'GET', url: page, success: function(result){
-                console.log("starting recursive search")
-                resolve(recursivePokeAPISearch(result, pokeName, 0));
-            },
-            error: function(request, status, error){
-                couldNotAccessAPIError(request, status, error);
-            }
-        })
-    })
-    return pokemonInfoURL;
-}
-
-
-/*recursively handling ajax request for pokemon searches*/
-function recursivePokeAPISearch(result, pokeName, offset){
-    //return new Promise((resolve, reject) => {
-        console.log("recursive searching" + offset)
-        var pokeFound = false;
-        var pokeinfo = new Promise((resolve, reject) => {
-            console.log("starting promise")
-            for(let pkmon of result.results){
-                console.log(pkmon.name)
-                if(pkmon.name == pokeName && !pokeFound){
-                    pokeFound = true;
-                    console.log("found pokemon")
-                    resolve(pkmon.url); 
-                }
-            }
-            if(!pokeFound && offset < 950){
-                pkOffset = offset + 50;
-                page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=" + pkOffset;
-                console.log("doing another get request" + page)
-                $.ajax({type:'GET', url: page, success: function(result){
-                        console.log("resolving promise with recusive call promise")
-                        resolve(recursivePokeAPISearch(result, pokeName, pkOffset))
-                    }, error: function(request, status, error){
-                        couldNotAccessAPIError(request, status, error);
-                        reject(error);
-                    }
-                })
-            }else{
-                if(offset >= 950){
-                    console.log("pokemon <" + pokeName + "> could not be found in pokeAPI")
-                    resolve(null);
-                }
-            }
-        })
-        console.log("finishing recursive search")
-        return pokeinfo;    
-}
-
-
-//// ////
 
 
 
@@ -882,10 +882,30 @@ $(document).ready(function(){
     $("#single-poke").on("click", createSinglePokeView);
     $("#compare-poke").on("click", createPokeCompareView);
     $("#edit-delete-poke").on("click", createManagePokeView);
-    $("#log-out").on("click", userLogOut);
-    
-    userLogIn(); ////
+    $("#create-poke").on("click", createCreatePokeView);
+    $("#logout").on("click", logOut);
+
+    //Check for status updates
+    (function updater() {
+        $.ajax({
+            url: '/api/messages/show', 
+            success: function(data) {
+                $("#messages-list").html("");
+                if (data.messages.length == 0) {
+                    $("#messages-list").append($('<li/>', {text: "No new messages"}));
+                }
+                data.messages.forEach(function(elem, i) {
+                    var time = new Date();
+                    time.setTime(elem.time);
+                    $("#messages-list").append(
+                        $('<li/>', {text: time.toLocaleTimeString() + " " + elem.text})
+                    );
+                });
+            },
+            complete: function() {
+                // Schedule the next request 10s after the current one is complete
+                setTimeout(updater, 10000);
+            }
+        });
+    })();
 });
-
-
-

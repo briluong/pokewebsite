@@ -9,12 +9,20 @@
 <body>
 <div class="container main">
     <div class="row header">
-        Pokemon Stats Viewer
+        <div class="col-sm-8 title">
+            <strong>POKEMON STATS VIEWER</strong>
+        </div>
+        <div class="col-sm-4 status-box">
+            <ul id="messages-list">
+                <li>No new messages</li>
+            </ul>
+        </div>
     </div>
     <div class="row content">
         <div class="col-sm-3">
         </div>
         <div class="col-sm-6 nav-box">
+            Navigation
             <ul class="nav">
                 <li class="main-nav-item nav-item" id="single-poke">
                     View stats of single Pokemon
@@ -24,6 +32,12 @@
                 </li>
                 <li class="main-nav-item nav-item" id="edit-delete-poke">
                     Manage Pokemon
+		</li>
+                <li class="main-nav-item nav-item" id="create-poke">
+                    Create a Pokemon
+                </li>
+                <li class="nav-item" id="logout">
+                    Logout
                 </li>
             </ul>
         </div>
