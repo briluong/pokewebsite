@@ -548,13 +548,11 @@ function createManagePokeView() {
             $('<sub-heading/>', {'class': 'sub-head', text: "Manage History"}),
             $('<table/>', {'class': 'history-table'})
                 .append($('<tr/>'))
-                    .append($('<th/>').html("ID").css("background-color", "#baefec"))
                     .append($('<th/>').html("Name").css("background-color", "#baefec"))
                     .append($('<th/>').html("Status").css("background-color", "#baefec"))
-                    .append($('<th/>').html("Delete").css("background-color", "#baefec"))
                     .append($('<table/>'), {'id': 'history-sub-table'})
         ),
-        //loadHistory(),
+        loadHistory(),
             
         $('<div/>', {'class': 'delete-container'}).append(
             $('<sub-heading/>', {'class': 'sub-head', text: "Delete Pokemon"}),
@@ -818,28 +816,20 @@ function loadHistory(){
         pokemonInfoURL = new Promise((resolve, reject) => {
     
         /* checking pokemon pages for that pokemon checking by number of sets*/
-        page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0"; //TODO
+        page = "/api/pokemon/" + localStorage.pokeUsername;
         $.ajax({type:'GET', url: page, success: function(result){
-                console.log("starting recursive search")
-                resolve(recursivePokeDBSearch(result, currUserName, 0)); //TODO
-            },
-            error: function(request, status, error){
-                couldNotAccessAPIError(request, status, error);
-            }
-        })
-    }) 
-    } else {
-        console.log("Error: No web storage support.");
-    }       
-    
-    if (typeof(userHistory) !== "undefined") {
+            console.log("success?")
+                console.log(result)
+                userHistory = result.data;
+                    if (typeof(userHistory) !== "undefined") {
         rhl = userHistory.length;
         for (var i = 0; i < rhl; i++) {
-            $('#history-sub-table').append($('<tr/>'))
-                .append($('<td/>').html(userHistory[i][0]))
-                .append($('<td/>').html(userHistory[i][1])) 
-                .append($('<td/>').html(userHistory[i][2])) 
-                .append($('<td/>').append($('<button/>', {'class': 'delete-poke', text: "Delete"}))).on("click", deleteFromDB(userHistory[i][0]))
+            console.log(i)
+            console.log(userHistory[i])
+            $('.history-table').append($('<tr/>'))
+                .append($('<td/>').html(userHistory[i].name))
+                .append($('<td/>').html(userHistory[i].status)) 
+
         }
     } else if (typeof(userHistory) == "undefined") {
         $('.history-container').html("");
@@ -851,6 +841,34 @@ function loadHistory(){
                 .append($('<td/>', {'placeholder': "empty"}))
         console.log("HOW IS THIS NOT WORKING");
     }
+            },
+            error: function(request, status, error){
+                couldNotAccessAPIError(request, status, error);
+            }
+        })
+    }) 
+    } else {
+        console.log("Error: No web storage support.");
+    }       
+    
+    // if (typeof(userHistory) !== "undefined") {
+    //     rhl = userHistory.length;
+    //     for (var i = 0; i < rhl; i++) {
+    //         $('#history-sub-table').append($('<tr/>'))
+    //             .append($('<td/>').html(userHistory[i].name))
+    //             .append($('<td/>').html(userHistory[i].status)) 
+    //             .append($('<td/>').append($('<button/>', {'class': 'delete-poke', text: "Delete"}))).on("click", deleteFromDB(userHistory[i][0]))
+    //     }
+    // } else if (typeof(userHistory) == "undefined") {
+    //     $('.history-container').html("");
+    //     $('.history-table').html("");
+    //     $('.history-table').append($('<tr/>'))
+    //             .append($('<td/>', {'placeholder': "empty", 'text':"something"})).html("something")
+    //             .append($('<td/>', {'placeholder': "empty"}))
+    //             .append($('<td/>', {'placeholder': "empty"})) 
+    //             .append($('<td/>', {'placeholder': "empty"}))
+    //     console.log("HOW IS THIS NOT WORKING");
+    // }
 
 }
 
