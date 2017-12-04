@@ -19,7 +19,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/:pokemonId', function(req, res) {
-    var username = getUser("test");
+    var username = req.query.username;
     var pokemon = req.params.pokemonId;
     if(pokemon && pokemon !== ""){
         // do the search thing
@@ -86,7 +86,7 @@ router.get('/:pokemonId', function(req, res) {
 router.post('/', function(req, res) {
 	var pokemon = req.body;
 	var pokeName = req.body.pokename;
-	var user = getUser("user");
+	var user = req.body.username;
 	console.log(pokemon);
 	// make sure pokemon with that name doesn't already exist
 	var pokemon = createPokemonCheck(pokeName, user);
@@ -364,9 +364,9 @@ function recursivePokeAPISearch(result, pokeName, offset){
 }
 
 
-function getUser(res){
-    return res;
-}
+// function getUser(){
+//     return localStorage.pokeUsername;
+// }
 
 
 module.exports = router;

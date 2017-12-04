@@ -93,7 +93,7 @@ function getRandomInt(min, max) {
 function getPokemonById(id, getPokemonName){
     pokemonName = $.ajax({
         type: 'GET',
-        url: "https://pokeapi.co/api/v2/pokemon/" + id.toString() + "/",
+        url: "https://pokeapi.co/api/v2/pokemon/" + id.toString() + "?username=" + localStorage.username,
         success: function(pokemonData){
              getPokemonName(pokemonData);
         },
@@ -478,6 +478,7 @@ function getPokeModel(){
                     'hp': $("input[name=hp]").val(),
                     'pokeimage': pokeImg,
                     'status': $('input[name=status]:checked').val()
+                    'user': localStorage.pokeUsername;
                 }
     return pokemon;
 }
