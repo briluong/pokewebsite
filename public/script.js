@@ -17,12 +17,21 @@ function createViewOutline() {
         $('<ul/>', {'class': 'nav'}).append(
             $('<li/>', {'class': 'nav-item', 'id': 'single-poke', text: "Single Pokemon data"}),
             $('<li/>', {'class': 'nav-item', 'id': 'compare-poke', text: "Pokemon comparison"}),
-            $('<li/>', {'class': 'nav-item', 'id': 'create-poke', text: "Create a Pokemon"})
+            $('<li/>', {'class': 'nav-item', 'id': 'create-poke', text: "Create a Pokemon"}),
+            $('<li/>', {'class': 'nav-item', 'id': 'logout', text: "Logout"})
         )
     )
     $("#single-poke").on("click", createSinglePokeView);
     $("#compare-poke").on("click", createPokeCompareView);
     $("#create-poke").on("click", createCreatePokeView);
+    $("#logout").on("click", logOut);
+}
+
+/* Return to welcome page */
+function logOut() {
+    // unset username
+    localStorage.removeItem("pokeUsername");
+    window.location = "/index.html";
 }
 
 
@@ -107,13 +116,13 @@ function getPokemonById(id, getPokemonName){
 /* Get a random Pokemon name from the API
  */
 function getRandomPokemon(event) {
-    randomPokemonId = getRandomInt(1, 802); // pokemon id are in ragne (1, 802)
+    randomPokemonId = getRandomInt(1, 802); // pokemon id are in range (1, 802)
     pokemon = getPokemonById(randomPokemonId, function(pokemonData){
         pokemonName = pokemonData.name // get name from pokemon data
         console.log("found random pokemon " + pokemonName);
         $("#"+event.data.field).val(pokemonName); // display pokemon name
-        });
-    }
+    });
+}
 
 
 /* Check that input is formFilledby querying API and display Pokemon stats
@@ -465,7 +474,7 @@ function submitPokemonCreationForm(){
         var pokemon = getPokeModel();
         $.ajax({
         type: 'POST',
-        url: "http://localhost:8080/api/pokemon/",
+        url: "/api/pokemon/",
         data: pokemon,
         success: function(data){
              successfulPokemonSubmission(data);
@@ -576,6 +585,7 @@ $(document).ready(function(){
     $("#single-poke").on("click", createSinglePokeView);
     $("#compare-poke").on("click", createPokeCompareView);
     $("#create-poke").on("click", createCreatePokeView);
+    $("#logout").on("click", logOut);
 
     //Check for status updates
     (function updater() {
