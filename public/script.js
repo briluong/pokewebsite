@@ -274,7 +274,7 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
     /*display the stats*/
     display_field
     .append($('<figure/>')
-        .append($('<img/>', {'src': pokemonInfo.sprites.front_default, 'height': 96, 'width': 96}))
+        .append($('<img/>', {'id': "front-default", 'src': pokemonInfo.sprites.front_default, 'height': 96, 'width': 96}))
         .append($('<figcaption/>').html("Front"))
     )
     if (pokemonInfo.sprites.back_default){
@@ -452,10 +452,10 @@ function submitPokemonCreationForm(){
 }
 
 function getPokeModel(){
-    var pokeImg = $("input[name=pokeimage]").val();
-    if(pokeImg==""){
+ /*    var pokeImg = $("input[name=pokeimage]").val();
+   if(pokeImg==""){
         pokeImg = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
-    }
+    }*/
     var pokemon = {'pokename': $("input[name=pokename]").val(),
                     'height': $("input[name=height]").val(),
                     'weight': $("input[name=weight]").val(),
@@ -467,7 +467,7 @@ function getPokeModel(){
                     'defense': $("input[name=defense]").val(),
                     'attack': $("input[name=attack]").val(),
                     'hp': $("input[name=hp]").val(),
-                    'pokeimage': pokeImg,
+                    'pokeimage': $("input[name=pokeimage]").val(),
                     'status': $('input[name=status]:checked').val(),
                     'user': localStorage.pokeUsername
                 }
@@ -481,12 +481,12 @@ function getPokeModel(){
 function isValidPokemonCreationForm(){
     console.log("validating pokemon creation form")
     var formFilled= true;
-    $("#create-poke-form input[type=text]").each(function(){
+    $("form input[type=text]").each(function(){
         console.log($(this).val())
         if($(this).val()==""){
             console.log($(this).attr("id"))
             if($(this).attr("name")!=="type2" && $(this).attr("name")!=="pokeimage"){
-                formFilled= false;
+                formFilled = false;
                 return false;
             }
         }
@@ -502,7 +502,13 @@ function previewImage() {
     url = $("input[name=pokeimage]").val();
     console.log(url);
     if(url==""){
-        url = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";       
+	var frontDefault = $("#front-default").attr("src");
+	if(frontDefault){
+		url = $("#front-default").attr("src");
+	}
+        else{
+		url = "https://cdn77.sadanduseless.com/wp-content/uploads/2014/03/derp8.jpg";     
+	}  
     }
     $('#create-poke-pic').attr('src', url);
     return;
@@ -719,7 +725,10 @@ function editSinglePokemon(){
 function renewPokemon(){
     // Add update to database.
     console.log("submit update");
-    updateToDB();    
+    pokename = $('#name4').text();
+    if(!submitPokemonUpdateForm(pokename)){
+	return;
+    };  
     $('#edit-text-editted').hide();
     $('#edit-text-curr').hide();
     $(".edit-pokemon-col").hide();
@@ -744,6 +753,7 @@ function submitPokemonUpdateForm(pokename){
         success: function(data){
             console.log(data);
             successfulPokemonUpdate(data);
+	    return true;
         },
         error: function(xhr) {
             if(xhr.status == 409){
@@ -786,12 +796,12 @@ function successfulPokemonDeletion(pokemon){
     return;
 }
 
-
+/*
 function updateToDB(){
     pokename = $('#name4').text();
-    submitPokemonUpdateForm(pokename);
+    if(!submitPokemonUpdateForm(pokename)){};
 }
-
+*/
 
 function showUpdatePokemon(){
     displayPokemonStats(input="#single-input-edit", 1);
@@ -811,7 +821,7 @@ function loadHistory(){
         pokemonInfoURL = new Promise((resolve, reject) => {
     
         /* checking pokemon pages for that pokemon checking by number of sets*/
-        page = "/api/pokemon/" + localStorage.pokeUsername;
+        page = "/api/pokemon/user/" + localStorage.pokeUsername;
         $.ajax({type:'GET', url: page, success: function(result){
                 console.log(result)
                 if (result && result.data.length >= 1) {

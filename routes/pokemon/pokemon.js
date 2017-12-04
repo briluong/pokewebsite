@@ -1,12 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const request = require('request')
+const request = require('request');
+const fs = require('fs');
+//const pokemonlist = require('./routes/pokemon/pokemonlist.json');
 
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
 var MongoDBUrl = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db";
 var pokeCollection = "sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION";
 // Routes relative to '/api/pokemon'
+var pokemonlistNameToId = fs.readFileSync('./routes/pokemon/pokemonlistname.json');
+var pokemonlistIdToName = fs.readFileSync('./routes/pokemon/pokemonlistid.json');
+
+var pokeapiNameToId = JSON.parse(pokemonlistNameToId);
+var pokeapiIdToName = JSON.parse(pokemonlistIdToName);
+console.log("loading pokeapi list");
+console.log(pokeapiIdToName);
+
+
 
 router.get('/', function(req, res) {
     console.log("bad get request")
@@ -53,11 +64,12 @@ router.get('/pokename/:pokemonId', function(req, res) {
             }
             // check the api db
             console.log("checking pokeapi");
-            var pokeapidb = searchOrigPokemon(pokemon);
-            pokeapidb.then(url => {
-                console.log("pokemon at: " + url)
-                if(url !== null){
-                    getPokemonFromPokeApi(url).then(data => {
+            var pokemonurl = searchOrigPokemon(pokemon);
+            //pokeapidb.then(url => {
+                if(pokemonurl !== null){
+		    console.log("pokemon at: " + pokemonurl)
+                    getPokemonFromPokeApi(pokemonurl).then(data => {
+			console.log();
                         res.status(200).json(data);
                     })
                     .catch(err =>{
@@ -67,9 +79,9 @@ router.get('/pokename/:pokemonId', function(req, res) {
                 else{
                     res.status(400).send("this pokemon does not exist");    
                 }
-            }).catch(err => {
+            /*}).catch(err => {
                 res.status(500).send("could not connect to database, please try again later");    
-            })
+            })*/
 
         }).catch(err => {
             res.status(500).send("could not connect to database, please try again later");
@@ -81,7 +93,21 @@ router.get('/pokename/:pokemonId', function(req, res) {
 
 });
 
-router.get('/:user', function(req, res) {
+router.get('/random', function(req, res) {
+    console.log("getting a random pokemon");
+    var pokeApiId = getRandomInt(1, 802).toString(); // pokemon id are in range (1, 802) 
+    console.log(pokeApiId);
+    var pokemonName = pokeapiIdToName[pokeApiId];
+    console.log(pokemonName);
+    if(pokemonName){
+	console.log("get random name success!");
+        res.status(200).send(pokemonName);
+	return;
+    }
+    res.status(500).send("problem getting random pokemon name");
+})
+
+router.get('/user/:user', function(req, res) {
     // get all a user's pokemon
     var user = req.params.user;
     lookupUserPokemon(user)
@@ -99,24 +125,6 @@ router.get('/:user', function(req, res) {
     })
 })
 
-router.get('/random', function(req, res) {
-    console.log("getting a random pokemon");
-    var url = "https://pokeapi.co/api/v2/pokemon/" + getRandomInt(1, 802); // pokemon id are in range (1, 802) 
-    console.log(url);
-    var pokemon = getPokemonFromPokeApi(url);
-    pokemon.then(data => {
-        console.log("retrieved random pokemon: " + data);
-        //var jsonPoke = JSON.parse(data);
-        var pokeName = data.name;
-        console.log(pokeName);
-        res.status(200).send(pokeName);
-    })
-    .catch(err => {
-        res.status(500).send("problem getting random pokemon name");  
-    })
-
-})
-
 //create new pokemon //NEED TO FIND WAY TO GET USERNAME
 router.post('/', function(req, res) {
 	var pokemon = req.body;
@@ -128,7 +136,8 @@ router.post('/', function(req, res) {
 	var pokemon = createPokemonCheck(pokeName, user);
 	pokemon.then(exists => {
             if(exists !== null){
-                res.status(409).json({message: "pokemon with this name already exists", data: pokemon});
+		console.log("pokemon with this name already exists");
+                res.status(409).send("pokemon with this name already exists");
             }
             else{
                 //store all info into a pokemon object and submit the pokemon
@@ -350,12 +359,17 @@ function createPokemonCheck(pokeName, user){
             }
             // then check other promise/ pokeapi
             var pokeUrl = searchOrigPokemon(pokeName);
-            pokeUrl
+	    if(pokeUrl !== null){
+	    	resolve(pokeUrl);
+		return;
+	    }
+	    resolve(null);
+            /*pokeUrl
             .then(url => {
                 console.log("Function 1: Pokemon list")
                 console.log(url)
-                if(url !== null){
-        		    request.get(url, function (err, res, body) {
+                if(pokeUrl !== null){
+        		    request.get(pokeUrl, function (err, res, body) {
                         if(err) {
                             console.log(err);
                             reject(err);
@@ -376,6 +390,7 @@ function createPokemonCheck(pokeName, user){
             .catch(err => {
                 console.log(err)
             })
+	*/
 
         })
         .catch(err => {
@@ -407,17 +422,27 @@ function searchLocalPokeDB(pokeName){
     }) 
 }
 
+function searchOrigPokemon(pokename){
+	var id = pokeapiNameToId[pokename];
+	if(id){
+		var url = "https://pokeapi.co/api/v2/pokemon/" + id;
+		return url;	
+	}
+	console.log("pokemon <" + pokename + "> does not exist in pokeapi");
+	return null;
+	
+}
 /*searches the orig pokeapi for pokemon with name pokeName and returns a promise with url if exists or null if it doesn't*/
-function searchOrigPokemon(pokeName){
+/*function searchOrigPokemon(pokeName){
     console.log("searching pokeapi")
     if (pokeName == ""){
         console.log("input was blank");
         return;
     } 
-    pokemonInfoURL = new Promise((resolve, reject) => {
+    pokemonInfoURL = new Promise((resolve, reject) => {*/
     
         /* checking pokemon pages for that pokemon checking by number of sets*/
-        page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
+/*        page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
     	request.get(page, function (err, res, body) {
     	    if(err) {
         		console.log("an error occured while retrieving the pokemon data, request could not be completed, ");
@@ -434,8 +459,9 @@ function searchOrigPokemon(pokeName){
     })
     return pokemonInfoURL;
 }
-
+*/
 /*recursively handling http get request for pokemon searches*/
+/*
 function recursivePokeAPISearch(result, pokeName, offset){
     console.log("recursive searching " + offset)
     var pokeFound = false;
@@ -449,8 +475,8 @@ function recursivePokeAPISearch(result, pokeName, offset){
         }
         if(!pokeFound && offset < 950){
             pkOffset = offset + 50;
-            page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=" + pkOffset;
-
+            page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=" + pkOffset; */
+/*
     	    request.get(page, function (err, res, body) {
 	       	if(err) {
 		        console.log("an error occured while retrieving the pokemon data, request could not be completed");
@@ -472,7 +498,7 @@ function recursivePokeAPISearch(result, pokeName, offset){
     console.log("finishing recursive search")
     return pokeinfo;    
 }
-
+*/
 
 /* Get a random Pokemon if from range (min, max)
  */
@@ -533,7 +559,9 @@ function updatePokemonInPokeDB(pokemon){
     console.log(stats);
 
     var sprites = null;
-    if(pokemon.sprites !== null){
+    console.log("setting sprites");
+    console.log(pokemon);
+    if(pokemon.pokeimage !== ""){
         sprites = {'front_default': pokemon.pokeimage};
     }
     console.log(sprites);
@@ -564,24 +592,33 @@ function updatePokemonInPokeDB(pokemon){
                     db.close();
                     return;  
                 }
+		console.log("mod success, checking sprites");
+		console.log(sprites);
                 if(sprites !== null){
-                    db.collection(pokeCollection).update({name: pokename}, {$set: {"sprites": sprites}}, function(err, results) {
-                        if(err){
-                            console.log(err);
-                            reject(err);  
-                        }
-                        console.log("successfully updated sprites");
-                        db.close();
-                        return;
-                    }) 
-                }
-                console.log("successfully modified");
-                db.collection(pokeCollection).find({name: pokename}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
-                    console.log(results);
-                    resolve(results);
-                    db.close();
-                    return;
-                })
+			console.log("updating sprites");
+                	db.collection(pokeCollection).update({name: pokename}, {$set: {"sprites": sprites}}, function(err, results) {
+                        	if(err){
+                           	 console.log(err);
+                           	 reject(err);  
+                        	}
+                        	console.log("successfully updated sprites");
+				db.collection(pokeCollection).find({name: pokename}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
+                   	 		console.log(results);
+                   	 		resolve(results);
+                   	 		db.close();
+                  	  		return;
+               			})
+                        	return;
+                    	}) 
+                }else{
+                	console.log("successfully modified, did not mod sprites");
+                	db.collection(pokeCollection).find({name: pokename}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
+                   	 	console.log(results);
+                   	 	resolve(results);
+                   	 	db.close();
+                  	  	return;
+               		})
+		}
             });
         });
     })   
