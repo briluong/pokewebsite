@@ -15,9 +15,9 @@ router.get('/', function(req, res) {
 });
 
 router.get('/pokename/:pokemonId', function(req, res) {
-    var username = req.query.username;
+    var username = req.query.user;
     console.log(req.query);
-    var pokemon = req.params.pokemonId;
+    var pokemon = req.params.pokemonId.toLowerCase().replace(/ /g, "-");
     var searchLocal = req.query.search;
     if(pokemon && pokemon !== ""){
         // do the search thing
@@ -39,12 +39,14 @@ router.get('/pokename/:pokemonId', function(req, res) {
                         console.log("pokemon is private, user matches to user : ")
                         console.log(data[index]);
                         res.status(200).json(data[index]);
+                        return;
                     }
                 }
                 //can't send
                 console.log("pokemon is private, user  does not match : " + data[index]);
                 console.log(data[index]);
                 res.status(409).send("this pokemon was made private by the user, could not retrieve data");
+                return;
             }
             if(searchLocal == 1){
                 res.status(409).send("you can only access your own creations");
@@ -118,7 +120,7 @@ router.get('/random', function(req, res) {
 //create new pokemon //NEED TO FIND WAY TO GET USERNAME
 router.post('/', function(req, res) {
 	var pokemon = req.body;
-	var pokeName = req.body.pokename;
+	var pokeName = req.body.pokename.toLowerCase().replace(/ /g, "-");
 	var user = req.body.user;
 	console.log("post request: ") 
     console.log(pokemon);
@@ -180,29 +182,40 @@ router.post('/', function(req, res) {
 //pokemonId is the pokemon's name
 router.put('/:pokemonId', function(req, res) {
     var user = req.query.user;
+    console.log(user);
     var updatedPokeData = req.body;
     var pokes = searchLocalPokeDB(req.params.pokemonId);
     pokes.then(data =>{
+        console.log("got pokemon:")
+        console.log(data);
         //double check user
         var pokemon = data[0];
+        console.log(pokemon);
+        console.log(user);
+        console.log(pokemon.user);
         if(pokemon.user !== user){
             console.log("user <" + user + "> not authorized to edit pokemon <" + pokename + ">");
             res.status(409).send("unauthorized for edit pokemon in db");    
         }
         else{
-            updatePokemonInPokeDB(pokename).then(data => {
+            console.log("going to update db")
+            updatePokemonInPokeDB(updatedPokeData).then(data => {
+                console.log(data);
                 if(data.length !== 1){
                     console.log("did not updaate one pokemon properly");
-                    res.status(500).send("an error occured when accessing the db");        
+                    res.status(500).send("an error occured when accessing the db");
+                    return;        
                 }
                 else{
                     console.log("update successful");
                     res.status(200).send(data[0]);
+                    return;
                 }                
             }).catch(err => {
                 console.log("problem with update");
                 res.status(500).send("an error occured when accessing the db");        
             })
+            return;
         }
     }).catch(err => {
         console.log("problem finding pokemon in localdb");
@@ -497,8 +510,9 @@ function deleteFromPokeDB(pokeName){
 /*delete pokemon with this name from the db*/
 function updatePokemonInPokeDB(pokemon){
 /*conecting to the database*/
-
-    var pokename = pokemon.pokename;
+    console.log("UPDATING");
+    console.log(pokemon)
+    var pokename = pokemon.pokename.toLowerCase().replace(/ /g, "-");
     console.log("updating pokemon <" + pokename + "> from db");
     var type = {"slot": 1, "type" : {'name': pokemon.type1}};
     var types = [type];
