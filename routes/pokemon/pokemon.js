@@ -20,6 +20,7 @@ router.get('/', function(req, res) {
 
 router.get('/pokename/:pokemonId', function(req, res) {
     var username = req.query.username;
+    console.log(req.query);
     var pokemon = req.params.pokemonId;
     if(pokemon && pokemon !== ""){
         // do the search thing
@@ -38,12 +39,14 @@ router.get('/pokename/:pokemonId', function(req, res) {
                     }
                     else if(data[index].status == "private" && data[index].user == username){
                         //send this pokemon to the user
-                        console.log("pokemon is private, user matches to user : " + data[index]);
+                        console.log("pokemon is private, user matches to user : ")
+                        console.log(data[index]);
                         res.status(200).json(data[index]);
                     }
                 }
                 //can't send
                 console.log("pokemon is private, user  does not match : " + data[index]);
+                console.log(data[index]);
                 res.status(409).send("this pokemon was made private by the user, could not retrieve data");
             }
             // check the api db
@@ -99,7 +102,8 @@ router.post('/', function(req, res) {
 	var pokemon = req.body;
 	var pokeName = req.body.pokename;
 	var user = req.body.username;
-	console.log(pokemon);
+	console.log("post request: ") 
+    console.log(pokemon);
 	// make sure pokemon with that name doesn't already exist
 	var pokemon = createPokemonCheck(pokeName, user);
 	pokemon.then(exists => {

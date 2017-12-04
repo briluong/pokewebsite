@@ -149,7 +149,7 @@ function displayPokemonStats(input) {
     /* TODO query API and if data is valid, display stats in $(.display-stats) */
     /* checking pokemon pages for that pokemon checking by number of sets*/
     //page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
-    var query = "/api/pokemon/pokename/" + pokemon;
+    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername;
     //$.ajax({type:'GET', url: page, success: function(result){
     //    recursiveAjaxSearch(result, input, 0, input);
     $.ajax({type:'GET', url: query, success: function(result){
@@ -457,7 +457,7 @@ function submitPokemonCreationForm(){
         var pokemon = getPokeModel();
         $.ajax({
         type: 'POST',
-        url: "/api/pokemon/pokename",
+        url: "/api/pokemon/",
         data: pokemon,
         success: function(data){
              successfulPokemonSubmission(data);
@@ -548,9 +548,6 @@ function successfulPokemonSubmission(pokemon){
     return;
 }
 
-function getCookie(string){
-    return "username";
-};
 
 
 /* Pretty print an attribute by replacing dashes with spaces and capitalizing the first letter */
