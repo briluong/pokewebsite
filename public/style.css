@@ -68,7 +68,6 @@ li.nav-item:active {
     padding-left: 0;
 }
 
-
 button:focus {
     background: turquoise;
 }
@@ -82,6 +81,8 @@ table, th, td {
 th, td {
     padding: 5px;
     text-align: left;    
+    padding: 12px;
+    margin-left: 0;
 }
 input {
     margin: 5px 10px 5px 10px;
@@ -92,4 +93,9 @@ figcaption {
 }
 figure {
     display: inline-block;
+}
+
+sub-heading {
+    color: turquoise;
+    text-transform: uppercase;
 }
