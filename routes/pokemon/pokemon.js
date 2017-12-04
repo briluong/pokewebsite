@@ -81,6 +81,24 @@ router.get('/pokename/:pokemonId', function(req, res) {
 
 });
 
+router.get('/:user', function(req, res) {
+    // get all a user's pokemon
+    var user = req.params.user;
+    lookupUserPokemon(user)
+    .then (data => {
+        if (data.length >= 1) {
+            console.log("ok");
+            console.log(data);
+            res.status(200).json({data:data});
+        } else {
+            res.status(204).send("user has not created any pokemon");
+        }
+    })
+    .catch(err => {
+        res.status(500).send("problem getting user's pokemon");
+    })
+})
+
 router.get('/random', function(req, res) {
     console.log("getting a random pokemon");
     var url = "https://pokeapi.co/api/v2/pokemon/" + getRandomInt(1, 802); // pokemon id are in range (1, 802) 
@@ -208,7 +226,7 @@ router.put('/:pokemonId', function(req, res) {
 
 //pokemonId is the pokemon's name
 router.delete('/:pokemonId', function(req, res) {
-    var user = req.query.user;
+    var user = req.query.username;
     var pokename = req.params.pokemonId;
     var pokes = searchLocalPokeDB(pokename);
     pokes.then(data =>{
@@ -234,6 +252,24 @@ router.delete('/:pokemonId', function(req, res) {
         res.status(500).send("an error occured");    
     })
 });
+
+/* get all pokemon created by user */
+function lookupUserPokemon(username) {
+    return new Promise((resolve, reject) => {
+        MongoClient.connect(MongoDBUrl, function(err,res){
+            if (err) {
+                console.log(err);
+                reject(err);
+            }
+            db = res;
+            db.collection(pokeCollection).find({user: username}, {_id:0, name:1, status:1}).toArray(function(err, results) {
+                resolve(results);
+                db.close();
+            })
+        })
+    })
+}
+
 
 /*retrieves pokemon at url and returns a promise with the pokemon data*/
 function getPokemonFromPokeApi(url){

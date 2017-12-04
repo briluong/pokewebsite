@@ -1,7 +1,3 @@
-//var MongoClient = require('mongodb').MongoClient;
-var MongoDBUrl = "mongodb://csc309f:csc309fall@ds117316.mlab.com:17316/csc309db";
-var pokeCollection = "sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION";
-
 /* Create side navigation bar and main content box
  */
 function createViewOutline() {
@@ -212,10 +208,7 @@ function doublePokemon(input_field){
 /* Retrieve two Pokemons' data from the API and compare their stats
  */
 function comparePokemon(p1, p2) {
-    /* TODO query API and if both names are valid, 
-     *      display pokemon1's stats in $("#comp-disp-0") 
-     *      display pokemon2's stats in $("#comp-disp-1") 
-     */
+
     // COMPARISON starts here    
     // attributes (base stats) to compare: speed, special defense, special attack, defense, attack and Hp.
     // respect id names: "speed"+i, "special-defense"+i, "special-attack"+i, "defense"+i, "attack"+i, and "hp"+i.
@@ -550,13 +543,11 @@ function createManagePokeView() {
             $('<sub-heading/>', {'class': 'sub-head', text: "Manage History"}),
             $('<table/>', {'class': 'history-table'})
                 .append($('<tr/>'))
-                    .append($('<th/>').html("ID").css("background-color", "#baefec"))
                     .append($('<th/>').html("Name").css("background-color", "#baefec"))
                     .append($('<th/>').html("Status").css("background-color", "#baefec"))
-                    .append($('<th/>').html("Delete").css("background-color", "#baefec"))
                     .append($('<table/>'), {'id': 'history-sub-table'})
         ),
-        //loadHistory(),
+        loadHistory(),
             
         $('<div/>', {'class': 'delete-container'}).append(
             $('<sub-heading/>', {'class': 'sub-head', text: "Delete Pokemon"}),
@@ -694,19 +685,17 @@ function deletePokemon(){
 
 /*TO BE FIXED error stuff*/
 function deleteFromDB(pokeName){
-    var pokemon = {'pokename': pokeName};
-    var query = "/api/pokemon/pokename/" + pokemon + "?user=" + localStorage.pokeUsername;
+    var query = "/api/pokemon/" + pokeName + "?username=" + localStorage.pokeUsername;
     $.ajax({
     type: 'DELETE',
     url: query,
-    data: pokemon,
     success: function(data){
          successfulPokemonDeletion(data);
     },
     error: function(xhr) {
         if(xhr.status == 409){
         console.log("cannot delete this pokemon");
-            alert("unauthorized to delete this pokemon?");
+            alert("unauthorized to delete this pokemon");
         }
         else{
         console.log(xhr.status + " error has occured");
@@ -792,7 +781,7 @@ function successfulPokemonDeletion(pokemon){
             $('<button/>', {'id': 'manage-pokemon', text: "Manage pokemon"})
         )
     );
-    renderPokemonStats(pokemon, $(".inner-content"), "1");
+    //renderPokemonStats(pokemon, $(".inner-content"), "1");
     $("#manage-pokemon").on("click", createManagePokeView);
     return;
 }
@@ -809,7 +798,7 @@ function showUpdatePokemon(){
     $('#edit-text-editted').show();
 }
 
-/*FIX THIS*/
+
 function loadHistory(){
     console.log("looking up user history")
     var userHistory;
@@ -822,10 +811,24 @@ function loadHistory(){
         pokemonInfoURL = new Promise((resolve, reject) => {
     
         /* checking pokemon pages for that pokemon checking by number of sets*/
-        page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0"; //TODO
+        page = "/api/pokemon/" + localStorage.pokeUsername;
         $.ajax({type:'GET', url: page, success: function(result){
-                console.log("starting recursive search")
-                resolve(recursivePokeDBSearch(result, currUserName, 0)); //TODO
+                console.log(result)
+                if (result && result.data.length >= 1) {
+                    userHistory = result.data;
+                    rhl = userHistory.length;
+                    for (var i = 0; i < rhl; i++) {
+                        console.log(i)
+                        console.log(userHistory[i])
+                        $('.history-table').append($('<tr/>'))
+                            .append($('<td/>').html(userHistory[i].name))
+                            .append($('<td/>').html(userHistory[i].status)) 
+                    }
+                } else {
+                    $('.history-table').append($('<tr/>'))
+                            .append($('<td/>', {'placeholder': "empty", 'text':"You have not created any Pokemon"}))
+                            .append($('<td/>', {'placeholder': "empty"}))
+                }
             },
             error: function(request, status, error){
                 couldNotAccessAPIError(request, status, error);
@@ -835,26 +838,6 @@ function loadHistory(){
     } else {
         console.log("Error: No web storage support.");
     }       
-    
-    if (typeof(userHistory) !== "undefined") {
-        rhl = userHistory.length;
-        for (var i = 0; i < rhl; i++) {
-            $('#history-sub-table').append($('<tr/>'))
-                .append($('<td/>').html(userHistory[i][0]))
-                .append($('<td/>').html(userHistory[i][1])) 
-                .append($('<td/>').html(userHistory[i][2])) 
-                .append($('<td/>').append($('<button/>', {'class': 'delete-poke', text: "Delete"}))).on("click", deleteFromDB(userHistory[i][0]))
-        }
-    } else if (typeof(userHistory) == "undefined") {
-        $('.history-container').html("");
-        $('.history-table').html("");
-        $('.history-table').append($('<tr/>'))
-                .append($('<td/>', {'placeholder': "empty", 'text':"something"})).html("something")
-                .append($('<td/>', {'placeholder': "empty"}))
-                .append($('<td/>', {'placeholder': "empty"})) 
-                .append($('<td/>', {'placeholder': "empty"}))
-        console.log("HOW IS THIS NOT WORKING");
-    }
 
 }
 
