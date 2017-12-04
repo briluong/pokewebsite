@@ -442,15 +442,13 @@ function deleteFromPokeDB(pokeName){
             console.log("connected to pokemon database");
             db = res
             // need this to be returned
-            var result = db.collection(pokeCollection).deleteOne({name: pokeName});
-            if(result.acknowledged && result.deletedCount == 1){
-                console.log("successfully deleted");
+            db.collection(pokeCollection).deleteOne({name: pokeName}, function(err, res) {
+                if (err) {
+                    console.log(err);
+                    reject(err);
+                }
                 resolve("ok");
-            }
-            else{
-                console.log("not successfully deleted");
-                resolve(result);                
-            }
+            });
             db.close();     
         });
     })   
@@ -482,15 +480,15 @@ function updatePokemonInPokeDB(pokemon){
 
     var sprites = null;
     if(pokemon.sprites !== null){
-        sprites = {'front_default': pokemon.pokeImg},
+        sprites = {'front_default': pokemon.pokeimage};
     }
     console.log(sprites);
-    var updateQuery = {"height": pokemon.height, "weight": pokemon.weight, "types": types, "stats": stats};
+    //var updateQuery = {"height": pokemon.height, "weight": pokemon.weight, "types": types, "stats": stats};
 
-    if(sprites !== null){
-        updateQuery["sprites"] = sprites;
-    }
-    console.log(updateQuery);
+    // if(sprites !== null){
+    //     updateQuery["sprites"] = sprites;
+    // // }
+    // console.log(updateQuery);
     return new Promise((resolve, reject) =>{
         MongoClient.connect(MongoDBUrl, function(err,res){
             if(err){
@@ -500,18 +498,33 @@ function updatePokemonInPokeDB(pokemon){
             console.log("connected to pokemon database");
             db = res
             // need this to be returned
-            var result = db.collection(pokeCollection).updateOne({name: pokename}, {$set: updateQuery});
-            if(result.acknowledged && result.modifiedCount == 1){
+            //cut this out later
+            db.collection(pokeCollection).find({name: pokename}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
+                        console.log(results);
+            })
+
+            db.collection(pokeCollection).update({name: pokename}, {$set: {"height": pokemon.height, "weight": pokemon.weight, "types": types, "stats": stats, "status": pokemon.status}}, function(err, results) {
+                if(err){
+                    console.log(err);
+                    reject(err);
+                    return;  
+                }
+                if(sprites !== null){
+                    db.collection(pokeCollection).update({name: pokename}, {$set: {"sprites": sprites}}, function(err, results) {
+                        if(err){
+                            console.log(err);
+                            reject(err);  
+                        }
+                        console.log("successfully updated sprites");
+                        return;
+                    }) 
+                }
                 console.log("successfully modified");
                 db.collection(pokeCollection).find({name: pokename}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
                     console.log(results);
                     resolve(results);
                 })
-            }
-            else{
-                console.log("not successfully modified");
-                reject(result);                
-            }
+            });
             db.close();     
         });
     })   
