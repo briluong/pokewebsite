@@ -114,7 +114,7 @@ var load_complete = dl_load && dr_load;
 function displayPokemonStats(input, localPoke) {
 
     var pokemon = $(input).val().toLowerCase().replace(/ /g, "-");
-    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername + "&search=" + localPoke;
+    var query = "/api/pokemon/pokename/" + pokemon + "?user=" + localStorage.pokeUsername + "&search=" + localPoke;
     $.ajax({type:'GET', url: query, success: function(result){
         if (input == "#single-input") {
             $(".display-stats").empty();
@@ -303,19 +303,19 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
 
     display_field
     .append($('<table/>', {'id':'stats'+i})
-        .append($('<tr/>', {'id': 'name'+i})
+        .append($('<tr/>')
             .append($('<th/>').html("Name:"))
-            .append($('<td/>').html(attributePP(pokemonInfo.name)))
+            .append($('<td/>', {'id': 'name'+i}).html(attributePP(pokemonInfo.name)))
         )
-        .append($('<tr/>', {'id': 'height'+i})
+        .append($('<tr/>')
             .append($('<th/>').html("Height:"))
-            .append($('<td/>').html(pokemonInfo.height))
+            .append($('<td/>', {'id': 'height'+i}).html(pokemonInfo.height))
         )
-        .append($('<tr/>', {'id': 'weight'+i})
+        .append($('<tr/>')
             .append($('<th/>').html("Weight:"))
-            .append($('<td/>').html(pokemonInfo.weight))
+            .append($('<td/>', {'id': 'weight'+i}).html(pokemonInfo.weight))
         )
-        .append($('<tr/>', {'id': 'poketypes'+i})
+        .append($('<tr/>')
             .append($('<th/>').html("Types: "))
             .append($('<td/>')
                 .append($('<ul/>', {'id':'poketypes'+i})
@@ -328,7 +328,7 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
         )
         .append(pokemonInfo.stats.map(pstat => $("<tr/>", {'class': 'pokestat', 'id': pstat.stat.name.toString()+i})
             .append($('<th/>').html(attributePP(pstat.stat.name)))
-            .append($('<td/>').html(pstat.base_stat))
+            .append($('<td/>', {'id': pstat.stat.name}).html(pstat.base_stat))
             )   
         )
     )
@@ -478,6 +478,8 @@ function getPokeModel(){
                     'status': $('input[name=status]:checked').val(),
                     'user': localStorage.pokeUsername
                 }
+    console.log(pokemon);
+    console.log($("input[name=pokename]"));
     return pokemon;
 }
 
@@ -612,7 +614,7 @@ function activeEditForm(){
             $('<table/>', {'id': 'edit-table'}).append(
                 $('<tr/>', {'id': 'input-name'})
                 .append($('<th/>', {'id': 'input0'})
-                    .append($('<input/>', {'type': 'text', 'name': 'name', 'id': 'single-input-0', 'value': $('#name4').text(), 'disabled': 'true', 'maxlength': "11", 'size': "15"})))
+                    .append($('<input/>', {'type': 'text', 'name': 'pokename', 'id': 'single-input-0', 'value': $('#name4').text(), 'disabled': 'true', 'maxlength': "11", 'size': "15"})))
                 ,
                 $('<tr/>', {'id': 'input-height'})
                 .append($('<th/>', {'id': 'input1'})
@@ -636,27 +638,27 @@ function activeEditForm(){
                 ,
                 $('<tr/>', {'id': 'input-speed'})
                 .append($('<th/>', {'id': 'input4'})
-                    .append($('<input/>', {'type': 'text', 'id': 'single-input-4', 'value': $('#speed').text(), 'placeholder': "Input Speed", 'maxlength': "11", 'size': "15"})))
+                    .append($('<input/>', {'type': 'text', 'name': 'speed', 'id': 'single-input-4', 'value': $('#speed').text(), 'placeholder': "Input Speed", 'maxlength': "11", 'size': "15"})))
                 ,
                 $('<tr/>', {'id': 'input-special-defense'})
                 .append($('<th/>', {'id': 'input5'})
-                    .append($('<input/>', {'type': 'text', 'id': 'single-input-5', 'value': $('#special-defense').text(), 'placeholder': "Input Special defense", 'maxlength': "11", 'size': "15"})))
+                    .append($('<input/>', {'type': 'text', 'name': 'spcdefense', 'id': 'single-input-5', 'value': $('#special-defense').text(), 'placeholder': "Input Special defense", 'maxlength': "11", 'size': "15"})))
                 ,
                 $('<tr/>', {'id': 'input-special-attack'})
                 .append($('<th/>', {'id': 'input6'})
-                    .append($('<input/>', {'type': 'text', 'id': 'single-input-6', 'value': $('#special-attack').text(), 'placeholder': "Input Special attack", 'maxlength': "11", 'size': "15"})))
+                    .append($('<input/>', {'type': 'text','name': 'spcattack', 'id': 'single-input-6', 'value': $('#special-attack').text(), 'placeholder': "Input Special attack", 'maxlength': "11", 'size': "15"})))
                 ,
                 $('<tr/>', {'id': 'input-defense'})
                 .append($('<th/>', {'id': 'input7'})
-                    .append($('<input/>', {'type': 'text', 'id': 'single-input-7', 'value': $('#defense').text(), 'placeholder': "Input Defense", 'maxlength': "11", 'size': "15"})))
+                    .append($('<input/>', {'type': 'text', 'name': 'defense', 'id': 'single-input-7', 'value': $('#defense').text(), 'placeholder': "Input Defense", 'maxlength': "11", 'size': "15"})))
                 ,
                 $('<tr/>', {'id': 'input-attack'})
                 .append($('<th/>', {'id': 'input8'})
-                    .append($('<input/>', {'type': 'text', 'id': 'single-input-8', 'value': $('#attack').text(), 'placeholder': "Input Attack", 'maxlength': "11", 'size': "15"})))
+                    .append($('<input/>', {'type': 'text', 'name': 'attack', 'id': 'single-input-8', 'value': $('#attack').text(), 'placeholder': "Input Attack", 'maxlength': "11", 'size': "15"})))
                 ,
                 $('<tr/>', {'id': 'input-hp'})
                 .append($('<th/>', {'id': 'input10'})
-                    .append($('<input/>', {'type': 'text', 'id': 'single-input-10', 'value': $('#hp').text(), 'placeholder': "Input Hp", 'maxlength': "11", 'size': "15"})))
+                    .append($('<input/>', {'type': 'text','name': 'hp', 'id': 'single-input-10', 'value': $('#hp').text(), 'placeholder': "Input Hp", 'maxlength': "11", 'size': "15"})))
                 ,
                 $('<tr/>', {'id': 'private-status'})
                 .append($('<th/>', {'id': 'input12', 'colspan' : 2})
@@ -665,7 +667,7 @@ function activeEditForm(){
                                 $('<input/>', {'type': 'radio', 'name': 'status', 'value': "private", 'text': 'private'}), "private"))
             )
         ),
-        $('<button/>', {'class': 'submit-button', 'id': 'confirm-edit-button', text: "Confirm Edit"}) 
+        $('<button/>', {'class': 'submit-button', 'id': 'confirm-edit-button', text: "Confirm Edit"}).on("click", renewPokemon) 
     )
 }
 
@@ -693,7 +695,7 @@ function deletePokemon(){
 /*TO BE FIXED error stuff*/
 function deleteFromDB(pokeName){
     var pokemon = {'pokename': pokeName};
-    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername;
+    var query = "/api/pokemon/pokename/" + pokemon + "?user=" + localStorage.pokeUsername;
     $.ajax({
     type: 'DELETE',
     url: query,
@@ -734,7 +736,7 @@ function renewPokemon(){
     $(".edit-pokemon-col").hide();
     // To load the updated pokemon from db.
     $(".display-stats-edit").empty();
-    showUpdatePokemon();
+    //showUpdatePokemon();
     
     $(".confirm-edit-button").hide();
     $('#edit-confirm-text').show();
@@ -742,15 +744,17 @@ function renewPokemon(){
 
 /*FINISH THIS error stuff*/
 function submitPokemonUpdateForm(pokename){
+    console.log("SUBMITTING FORM")
     if(isValidPokemonCreationForm()){
         var pokemon = getPokeModel();
-        var query = "/api/pokemon/pokename/" + pokename + "?username=" + localStorage.pokeUsername;
+        var query = "/api/pokemon/" + pokemon.pokename.toLowerCase().replace(/ /g, "-") + "?user=" + localStorage.pokeUsername;
         $.ajax({
         type: 'PUT',
         url: query,
         data: pokemon,
         success: function(data){
-             successfulPokemonUpdate(data);
+            console.log(data);
+            successfulPokemonUpdate(data);
         },
         error: function(xhr) {
             if(xhr.status == 409){
