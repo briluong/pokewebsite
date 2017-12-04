@@ -9,18 +9,101 @@ var pokeCollection = "sweet-and-spicy-grilled-pineapple-pokemon-COLLECTION";
 // Routes relative to '/api/pokemon'
 
 router.get('/', function(req, res) {
-	console.log("req: " + req);
-	console.log("res: " + res);
+    // console.log("bad get request")
+    // res.send("request too large to handle, please request a single pokemon using the following format: /api/pokemon/[pokemon name]");
+
+    console.log("req: " + req);
+    console.log("res: " + res);
     res.json({message: "nothing to see here either"});
 
 });
+
+router.get('/pokename/:pokemonId', function(req, res) {
+    var username = req.query.username;
+    console.log(req.query);
+    var pokemon = req.params.pokemonId;
+    if(pokemon && pokemon !== ""){
+        // do the search thing
+        var pokesearch = searchLocalPokeDB(pokemon);
+        pokesearch.then(data => {
+            console.log("retrieved " + data + " from localdb");
+            console.log(data);
+            console.log(data.length);
+            if(data.length > 0){
+                console.log("found pokemon with name: " + pokemon);
+                for(index = 0; index < data.length; index++){
+                    if(data[index].status == "public"){
+                        // send this pokemon to the user
+                        console.log("pokemon is public, sending to user : " + data[index]);
+                        res.status(200).json(data[index]);
+                    }
+                    else if(data[index].status == "private" && data[index].user == username){
+                        //send this pokemon to the user
+                        console.log("pokemon is private, user matches to user : ")
+                        console.log(data[index]);
+                        res.status(200).json(data[index]);
+                    }
+                }
+                //can't send
+                console.log("pokemon is private, user  does not match : " + data[index]);
+                console.log(data[index]);
+                res.status(409).send("this pokemon was made private by the user, could not retrieve data");
+            }
+            // check the api db
+            console.log("checking pokeapi");
+            var pokeapidb = searchOrigPokemon(pokemon);
+            pokeapidb.then(url => {
+                console.log("pokemon at: " + url)
+                if(url !== null){
+                    getPokemonFromPokeApi(url).then(data => {
+                        res.status(200).json(data);
+                    })
+                    .catch(err =>{
+                        res.status(500).send("could not retireve pokemon data from database, please try again later");        
+                    })
+                }
+                else{
+                    res.status(400).send("this pokemon does not exist");    
+                }
+            }).catch(err => {
+                res.status(500).send("could not connect to database, please try again later");    
+            })
+
+        }).catch(err => {
+            res.status(500).send("could not connect to database, please try again later");
+        })
+    }
+    else{
+        res.status(400).send("pokemon not provided");
+    };
+
+});
+
+router.get('/random', function(req, res) {
+    console.log("getting a random pokemon");
+    var url = "https://pokeapi.co/api/v2/pokemon/" + getRandomInt(1, 802); // pokemon id are in range (1, 802) 
+    console.log(url);
+    var pokemon = getPokemonFromPokeApi(url);
+    pokemon.then(data => {
+        console.log("retrieved random pokemon: " + data);
+        //var jsonPoke = JSON.parse(data);
+        var pokeName = data.name;
+        console.log(pokeName);
+        res.status(200).send(pokeName);
+    })
+    .catch(err => {
+        res.status(500).send("problem getting random pokemon name");  
+    })
+
+})
 
 //create new pokemon //NEED TO FIND WAY TO GET USERNAME
 router.post('/', function(req, res) {
 	var pokemon = req.body;
 	var pokeName = req.body.pokename;
-	var user = getUser("user");
-	console.log(pokemon);
+	var user = req.body.username;
+	console.log("post request: ") 
+    console.log(pokemon);
 	// make sure pokemon with that name doesn't already exist
 	var pokemon = createPokemonCheck(pokeName, user);
 	pokemon.then(exists => {
@@ -86,6 +169,22 @@ router.delete('/:pokemonId', function(req, res) {
     res.json({message: "can't delete pokemon yet"});
 });
 
+/*retrieves pokemon at url and returns a promise with the pokemon data*/
+function getPokemonFromPokeApi(url){
+    return new Promise((resolve, reject) => {
+        request.get(url, function (err, res, body) {
+            if(err) {
+                console.log(err);
+                reject(err);
+            }
+            else {
+                var data = JSON.parse(body)
+                console.log("retrieving pokemon from pokeapi")
+                resolve(data); 
+            }
+        })
+    })
+}
 
 /* puts pokemon into db*/
 function submitNewPokemonToDB(pokemon){
@@ -146,23 +245,14 @@ function createPokemonCheck(pokeName, user){
         // this is not null or empty
         localPokes
         .then(data => {
-            console.log("retrieved <" + pokeName + "> form local db");
+            console.log("retrieved <" + pokeName + "> from local db");
             console.log(data);
+            console.log(data.length);
             //data should be an array or is null
             if(data.length > 0){
-                for(index = 0; index < data.length; index++){
-                    if(data[index].status == "public"){
-                        console.log("<" + pokeName + "> is already taken");
-                        resolve(data[index]);
-                        return;
-                    }
-                    else if(data[index].user == user){
-                        console.log("user already made pokemon with name <" + pokeName + ">");
-                        resolve(data[index]);
-                        return;
-                    }
-                }
-
+                console.log("pokemon with name <" + pokeName + "> already exists");
+                resolve(data[0]);
+                return;
             }
             // then check other promise/ pokeapi
             var pokeUrl = searchOrigPokemon(pokeName);
@@ -171,18 +261,18 @@ function createPokemonCheck(pokeName, user){
                 console.log("Function 1: Pokemon list")
                 console.log(url)
                 if(url !== null){
-		    request.get(url, function (err, res, body) {
-		        if(err) {
-		            console.log(err);
-			    reject(err);
-		        } 
-			else {
-			    var data = JSON.parse(body)
-			    console.log("retrieving pokemon from pokeapi")
+        		    request.get(url, function (err, res, body) {
+                        if(err) {
+                            console.log(err);
+                            reject(err);
+                        } 
+                        else {
+                            var data = JSON.parse(body)
+                            console.log("retrieving pokemon from pokeapi")
                             resolve(data);
                             return; 
-		        }
-		    })
+                        }
+                    })
                 }
                 else{
                     // no pokemon with that name exists
@@ -215,6 +305,7 @@ function searchLocalPokeDB(pokeName){
             db = res
             // need this to be returned
             db.collection(pokeCollection).find({name: pokeName}, { _id:0, name:1, height:1, weight:1, types:1, stats:1, sprites:1, user:1, status:1}).toArray(function(err, results){
+                console.log(results);
                 resolve(results);
                 db.close();
             })     
@@ -233,18 +324,18 @@ function searchOrigPokemon(pokeName){
     
         /* checking pokemon pages for that pokemon checking by number of sets*/
         page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=0";
-	request.get(page, function (err, res, body) {
-	    if(err) {
-		console.log("an error occured while retrieving the pokemon data, request could not be completed");
-		reject(err);
-	    }
-	    else {
-		var data = JSON.parse(body)
-		console.log("starting recursive search")
-		resolve(recursivePokeAPISearch(data, pokeName, 0));
-		return;
-	    }
-	})
+    	request.get(page, function (err, res, body) {
+    	    if(err) {
+        		console.log("an error occured while retrieving the pokemon data, request could not be completed, ");
+        		reject(err);
+    	    }
+    	    else {
+        		var data = JSON.parse(body)
+        		console.log("starting recursive search")
+        		resolve(recursivePokeAPISearch(data, pokeName, 0));
+        		return;
+    	    }
+    	})
 
     })
     return pokemonInfoURL;
@@ -266,16 +357,16 @@ function recursivePokeAPISearch(result, pokeName, offset){
             pkOffset = offset + 50;
             page = "https://pokeapi.co/api/v2/pokemon/?limit=50&offset=" + pkOffset;
 
-	    request.get(page, function (err, res, body) {
-		if(err) {
-		    console.log("an error occured while retrieving the pokemon data, request could not be completed");
-		    reject(error);
-		}
-		else {
-		    var data = JSON.parse(body);
-		    console.log("resolving promise with recusive call promise")
-		    resolve(recursivePokeAPISearch(data, pokeName, pkOffset)) 
-		}
+    	    request.get(page, function (err, res, body) {
+	       	if(err) {
+		        console.log("an error occured while retrieving the pokemon data, request could not be completed");
+		        reject(error);
+		    }
+		    else {
+                var data = JSON.parse(body);
+                console.log("resolving promise with recusive call promise")
+                resolve(recursivePokeAPISearch(data, pokeName, pkOffset)) 
+            }
 	    })
         }else{
             if(offset >= 950){
@@ -289,9 +380,16 @@ function recursivePokeAPISearch(result, pokeName, offset){
 }
 
 
-function getUser(res){
-    return res;
+/* Get a random Pokemon if from range (min, max)
+ */
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
+// function getUser(){
+//     return localStorage.pokeUsername;
+// }
 
 
 module.exports = router;
