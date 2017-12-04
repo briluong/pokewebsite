@@ -18,6 +18,7 @@ router.get('/pokename/:pokemonId', function(req, res) {
     var username = req.query.username;
     console.log(req.query);
     var pokemon = req.params.pokemonId;
+    var searchLocal = req.query.search;
     if(pokemon && pokemon !== ""){
         // do the search thing
         var pokesearch = searchLocalPokeDB(pokemon);
@@ -44,6 +45,9 @@ router.get('/pokename/:pokemonId', function(req, res) {
                 console.log("pokemon is private, user  does not match : " + data[index]);
                 console.log(data[index]);
                 res.status(409).send("this pokemon was made private by the user, could not retrieve data");
+            }
+            if(searchLocal == 1){
+                res.status(409).send("you can only access your own creations");
             }
             // check the api db
             console.log("checking pokeapi");
@@ -158,8 +162,8 @@ router.post('/', function(req, res) {
 //pokemonId is the pokemon's name
 router.put('/:pokemonId', function(req, res) {
     var user = req.query.user;
-    var pokename = req.params.pokemonId;
-    var pokes = searchLocalPokeDB(pokename);
+    var updatedPokeData = req.body;
+    var pokes = searchLocalPokeDB(req.params.pokemonId);
     pokes.then(data =>{
         //double check user
         var pokemon = data[0];
@@ -170,7 +174,7 @@ router.put('/:pokemonId', function(req, res) {
         else{
             updatePokemonInPokeDB(pokename).then(data => {
                 if(data.length !== 1){
-                    console.log("an error occurred when trying to update <" + pokename + "> in db (more than one object returned)");
+                    console.log("did not updaate one pokemon properly");
                     res.status(500).send("an error occured when accessing the db");        
                 }
                 else{
@@ -178,12 +182,12 @@ router.put('/:pokemonId', function(req, res) {
                     res.status(200).send(data[0]);
                 }                
             }).catch(err => {
-                console.log("an error occurred when trying to update <" + pokename + "> in db");
+                console.log("problem with update");
                 res.status(500).send("an error occured when accessing the db");        
             })
         }
     }).catch(err => {
-        console.log("an error occurred when trying access the db for <" + pokename + ">");
+        console.log("problem finding pokemon in localdb");
         res.status(500).send("an error occured");    
     })
     
