@@ -683,19 +683,17 @@ function deletePokemon(){
 
 /*TO BE FIXED error stuff*/
 function deleteFromDB(pokeName){
-    var pokemon = {'pokename': pokeName};
-    var query = "/api/pokemon/pokename/" + pokemon + "?username=" + localStorage.pokeUsername;
+    var query = "/api/pokemon/" + pokeName + "?username=" + localStorage.pokeUsername;
     $.ajax({
     type: 'DELETE',
     url: query,
-    data: pokemon,
     success: function(data){
          successfulPokemonDeletion(data);
     },
     error: function(xhr) {
         if(xhr.status == 409){
         console.log("cannot delete this pokemon");
-            alert("unauthorized to delete this pokemon?");
+            alert("unauthorized to delete this pokemon");
         }
         else{
         console.log(xhr.status + " error has occured");
@@ -779,7 +777,7 @@ function successfulPokemonDeletion(pokemon){
             $('<button/>', {'id': 'manage-pokemon', text: "Manage pokemon"})
         )
     );
-    renderPokemonStats(pokemon, $(".inner-content"), "1");
+    //renderPokemonStats(pokemon, $(".inner-content"), "1");
     $("#manage-pokemon").on("click", createManagePokeView);
     return;
 }
@@ -821,7 +819,6 @@ function loadHistory(){
                         $('.history-table').append($('<tr/>'))
                             .append($('<td/>').html(userHistory[i].name))
                             .append($('<td/>').html(userHistory[i].status)) 
-
                     }
                 } else {
                     $('.history-table').append($('<tr/>'))

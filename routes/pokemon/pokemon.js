@@ -213,7 +213,7 @@ router.put('/:pokemonId', function(req, res) {
 
 //pokemonId is the pokemon's name
 router.delete('/:pokemonId', function(req, res) {
-    var user = req.query.user;
+    var user = req.query.username;
     var pokename = req.params.pokemonId;
     var pokes = searchLocalPokeDB(pokename);
     pokes.then(data =>{
