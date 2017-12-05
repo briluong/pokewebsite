@@ -4,7 +4,6 @@ Student 2: Ellen Uppington (1000642138)
 Student 3: Brianna Luong (1000303049)
 Student 4: Hassan Ali (1001144718)
 
-
 # Pokemon Web Page
 
 The purpose of our web application is to view and compare Pokemon stats and basic information, also allow users to create, manage and publish new Pokemon.
@@ -62,3 +61,6 @@ The last section of the navigation page is Log Out. Selecting the button in eith
 	- Making a DELETE request to /api/messages/<id> will delete the message with <id>
 	- ex: $ curl -XDELETE localhost:8080/api/messages/5a24ba4a2718d70f14982b78
 	- You can get a message's id by making a GET request, or alternatively a new message's id will be shown after a POST
+
+#### NOTES
+- we are submitting one day late :(
