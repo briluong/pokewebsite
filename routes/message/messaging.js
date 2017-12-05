@@ -11,7 +11,7 @@ var messageAge = 3; // messages older than this number (in minutes) are not cons
 
 /* Routes relative to /api/messages */
 
-// Retrieve all messages
+/* Retrieve all messages */
 router.get('/', function(req, res) {
 	getAll()
 	.then(data => {
@@ -22,7 +22,7 @@ router.get('/', function(req, res) {
 	});
 });
 
-// Retrieve all messages that should be displayed on the page
+/* Retrieve all messages that should be displayed on the page */
 router.get('/show', function(req, res) {
 
 	var now = Date.now();
@@ -46,13 +46,12 @@ router.get('/show', function(req, res) {
 
 });
 
-// Post new message
+/* Post new message */
 router.post('/', function(req, res) {
 	var message = req.body.data;
 	var time = new Date();
 	time.setTime(Date.now());
-	var status = "unread"; // TODO might need different status for each user
-
+	var status = "unread"; 
 	// Add message to the DB
 	putMessage(message, status) 
 	.then(data => {
@@ -64,7 +63,7 @@ router.post('/', function(req, res) {
 	});
 });
 
-// Delete all read messages
+/* Delete all read messages */
 router.delete('/clear', function(req, res) {
 	deleteAllRead()
 	.then(num => {
@@ -75,7 +74,7 @@ router.delete('/clear', function(req, res) {
 	});
 })
 
-// Delete message with ID
+/* Delete message with ID */
 router.delete('/:ID', function(req, res) {
 
 	var id = req.params.ID;
@@ -91,7 +90,7 @@ router.delete('/:ID', function(req, res) {
 
 module.exports = router;
 
-// Get all messages in the collection
+/* Get all messages in the collection */
 function getAll() {
 	return new Promise((resolve, reject) => {
 		MongoClient.connect(MongoDBUrl, function(err,res) {
@@ -107,7 +106,7 @@ function getAll() {
 	});
 }
 
-// Get all messages that are unread or less than age minutes old
+/* Get all messages that are unread or less than age minutes old */
 function getNewMessages(now, age) {
 	return new Promise((resolve, reject) => {
 		MongoClient.connect(MongoDBUrl, function(err,res) {
@@ -129,7 +128,7 @@ function getNewMessages(now, age) {
 	});
 }
 
-// Set status of each new message to "read"
+/* Set status of each new message to "read" */
 function markAsRead(now, age) {
 	return new Promise((resolve, reject) => {
 		MongoClient.connect(MongoDBUrl, function(err,res) {
@@ -150,7 +149,7 @@ function markAsRead(now, age) {
 	});
 }
 
-// Add a message to the collection
+/* Add a message to the collection */
 function putMessage(message, stat) {
 	return new Promise((resolve, reject) => {
 		MongoClient.connect(MongoDBUrl, function(err,res){
@@ -174,7 +173,7 @@ function putMessage(message, stat) {
 	});
 }
 
-// Delete a message from the collection
+/* Delete a message from the collection */
 function deleteMessage(mID) {
 	return new Promise((resolve, reject) => {
 		MongoClient.connect(MongoDBUrl, function(err,res) {
@@ -195,7 +194,7 @@ function deleteMessage(mID) {
 	});
 }
 
-// Delete all read messages
+/* Delete all read messages */
 function deleteAllRead() {
 	return new Promise((resolve, reject) => {
 		MongoClient.connect(MongoDBUrl, function(err,res) {
@@ -216,7 +215,7 @@ function deleteAllRead() {
 	});
 }
 
-// For debugging: display everything in the messages DB
+/* For debugging: display everything in the messages DB */
 function printAll() {
 	MongoClient.connect(MongoDBUrl, function(err,res) {
 		if (err) console.log(err);

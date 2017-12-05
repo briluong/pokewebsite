@@ -7,9 +7,9 @@ var userCollection = "sweet-and-spicy-grilled-pineapple-user-COLLECTION";
 
 // routes relative to /api/user
 
-
+/*  new user requesting to sign up */
 router.post('/signup', function(req, res) {
-    // new user requesting to sign up; check to make sure username is unique then
+    // check to make sure username is unique then
     // add them to the DB
     var username = req.body.username;
     var password = req.body.password;
@@ -33,8 +33,9 @@ router.post('/signup', function(req, res) {
     }
 })
 
+/* user requesting to login */
 router.post('/login', function(req, res) {
-    // user requesting to login; check their credentials are valid
+    // check their credentials are valid
     var username = req.body.username;
     var password = req.body.password;
 
@@ -54,7 +55,7 @@ router.post('/login', function(req, res) {
 
 module.exports = router;
 
-
+/* sign up the user */
 function signUp(username, password){
     //check if user name is already in use, if not add them to DB
     return new Promise((resolve, reject) => {      
@@ -83,7 +84,7 @@ function signUp(username, password){
     })
 }
 
-// See if username, password pair exist in the DB 
+/* See if username, password pair exist in the DB */
 function verifyUser(username, password) {
     return new Promise((resolve, reject) => {
         MongoClient.connect(MongoDBUrl, function(err,res) {
@@ -106,6 +107,7 @@ function verifyUser(username, password) {
     })
 }
 
+/* gets user with username from db */
 function getUserFromDB(username){
     return new Promise((resolve, reject) =>{
         MongoClient.connect(MongoDBUrl, function(err,res){
@@ -125,7 +127,7 @@ function getUserFromDB(username){
     }) 
 }
 
-
+/* adds user and password to db */
 function addUserToDB(username, password){
     // add a new user
     return new Promise((resolve, reject) =>{
