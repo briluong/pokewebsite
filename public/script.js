@@ -1,5 +1,4 @@
-/* Create side navigation bar and main content box
- */
+/* Create side navigation bar and main content box */
 function createViewOutline() {
     $(".content").remove();
 
@@ -105,8 +104,12 @@ var load_complete = dl_load && dr_load;
 
 /* displays pokemon stats of pokemon */
 function displayPokemonStats(input, localPoke) {
-
     var pokemon = $(input).val().toLowerCase().replace(/ /g, "-");
+    if (pokemon == ""){
+        $(".display-stats").empty();
+        alert('You input is blank, please input.');
+        return;
+    }
     var query = "/api/pokemon/pokename/" + pokemon + "?user=" + localStorage.pokeUsername + "&search=" + localPoke;
     $.ajax({type:'GET', url: query, success: function(result){
         if (input == "#single-input") {
@@ -326,7 +329,6 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
     if (i == 4) {activeEditForm()};
 
 }
-
 
 
 /* Create Create Pokemon view */
