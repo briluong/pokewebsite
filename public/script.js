@@ -138,11 +138,16 @@ function displayPokemonStats(input, localPoke) {
             $(".display-stats-delete").empty();
             display_field = $(".display-stats-delete");
             i = 3;
+	    $('#delete-text-curr').show()
+    	    $(".confirm-delete-button").show()
         }
         else if (input == "#single-input-edit") {
             $(".display-stats-edit").empty();
             display_field = $(".display-stats-edit");
             i = 4;
+	    $('#edit-text-curr').show();
+    	    $(".edit-pokemon-col").show();
+    	    $(".confirm-edit-button").show();
         }
         renderPokemonStats(result, display_field, i.toString())
         handle_load(load_complete);
@@ -671,9 +676,7 @@ function activeEditForm(){
 
 /* delete pokemon */
 function deleteSinglePokemon(){
-    displayPokemonStats(input="#single-input-delete", 1);    
-    $('#delete-text-curr').show()
-    $(".confirm-delete-button").show()
+    displayPokemonStats(input="#single-input-delete", 2);    
     $('#delete-confirm-text').hide()
 }
 
@@ -683,10 +686,7 @@ function deletePokemon(){
     
     console.log("submit delete");
     deleteFromDB(pokename);
-    $('#delete-text-curr').hide();
-    $(".display-stats-delete").empty();
-    $(".confirm-delete-button").hide();
-    $('#delete-confirm-text').show();
+	
 }
 
 /*TO BE FIXED error stuff*/
@@ -696,7 +696,7 @@ function deleteFromDB(pokeName){
     type: 'DELETE',
     url: query,
     success: function(data){
-         successfulPokemonDeletion(data);
+        successfulPokemonDeletion(data);
     },
     error: function(xhr) {
         if(xhr.status == 409){
@@ -713,11 +713,8 @@ function deleteFromDB(pokeName){
 
 
 function editSinglePokemon(){
-    displayPokemonStats(input="#single-input-edit", 1);        
-    $('#edit-text-curr').show();
+    displayPokemonStats(input="#single-input-edit", 2);
     $('#edit-text-editted').hide();
-    $(".edit-pokemon-col").show();
-    $(".confirm-edit-button").show();
     $('#edit-confirm-text').hide();
 }
 
@@ -792,8 +789,13 @@ function successfulPokemonDeletion(pokemon){
         )
     );
     //renderPokemonStats(pokemon, $(".inner-content"), "1");
+    $('#delete-text-curr').hide();
+    $(".display-stats-delete").empty();
+    $(".confirm-delete-button").hide();
+    $('#delete-confirm-text').show();
+    
     $("#manage-pokemon").on("click", createManagePokeView);
-    return;
+    return true;
 }
 
 /*

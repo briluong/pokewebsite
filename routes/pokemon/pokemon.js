@@ -41,9 +41,15 @@ router.get('/pokename/:pokemonId', function(req, res) {
                 console.log("found pokemon with name: " + pokemon);
                 for(index = 0; index < data.length; index++){
                     if(data[index].status == "public"){
+			if(searchLocal == 2 && data[index].user !== username){
+				console.log(data[index].user + " trying to get pokemon to manage, but does not match" + user);
+                        	res.status(409).json(data[index]);
+				return;
+			}
                         // send this pokemon to the user
                         console.log("pokemon is public, sending to user : " + data[index]);
                         res.status(200).json(data[index]);
+			return;
                     }
                     else if(data[index].status == "private" && data[index].user == username){
                         //send this pokemon to the user
@@ -59,7 +65,7 @@ router.get('/pokename/:pokemonId', function(req, res) {
                 res.status(409).send("this pokemon was made private by the user, could not retrieve data");
                 return;
             }
-            if(searchLocal == 1){
+            if(searchLocal > 0){
                 res.status(409).send("you can only access your own creations");
             }
             // check the api db
