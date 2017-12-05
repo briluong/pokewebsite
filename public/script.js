@@ -317,7 +317,7 @@ function renderPokemonStats(pokemonInfo, display_field, i) {
             .append($('<th/>').html("Types: "))
             .append($('<td/>')
                 .append($('<ul/>', {'id':'poketypes'+i})
-                    .append(pokemonInfo.types.map(ptype => $("<li>").text(attributePP(ptype.type.name))))
+                    .append(pokemonInfo.types.map(ptype => $("<li>", {'id': "type" + ptype.slot}).text(attributePP(ptype.type.name))))
                 )
             )
         )
@@ -629,9 +629,9 @@ function activeEditForm(){
                 $('<tr/>', {'id': 'input-types'})
                 .append($('<th/>', {'id': 'input3'})
                     .append(
-                        $('<p>').html("Please type in to confirm the types, at most 2 types for each pokemon."),
-                        $('<input/>', {'type': 'text', 'name': 'type1', 'id': 'single-input-3-1', 'placeholder': 'Normal', 'size': "15"}),
-                        $('<input/>', {'type': 'text', 'name': 'type2', 'id': 'single-input-3-2', 'value': $('#types4').text(), 'size': "15"})
+                        //$('<p>').html("Please type in to confirm the types, at most 2 types for each pokemon."),
+                        $('<input/>', {'type': 'text', 'name': 'type1', 'id': 'single-input-3-1', 'value':$('#type1').text(),'placeholder': 'Input Type1', 'size': "15"}),
+                        $('<input/>', {'type': 'text', 'name': 'type2', 'id': 'single-input-3-2', 'value': $('#type2').text(), 'placeholder': 'Type2 Optional', 'size': "15"})
                     )
                 )
                 ,

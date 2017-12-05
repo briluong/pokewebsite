@@ -14,8 +14,6 @@ var pokemonlistIdToName = fs.readFileSync('./routes/pokemon/pokemonlistid.json')
 
 var pokeapiNameToId = JSON.parse(pokemonlistNameToId);
 var pokeapiIdToName = JSON.parse(pokemonlistIdToName);
-console.log("loading pokeapi list");
-console.log(pokeapiIdToName);
 
 
 
@@ -42,7 +40,7 @@ router.get('/pokename/:pokemonId', function(req, res) {
                 for(index = 0; index < data.length; index++){
                     if(data[index].status == "public"){
 			if(searchLocal == 2 && data[index].user !== username){
-				console.log(data[index].user + " trying to get pokemon to manage, but does not match" + user);
+				console.log(data[index].user + " trying to get pokemon to manage, but does not match" + username);
                         	res.status(409).json(data[index]);
 				return;
 			}
